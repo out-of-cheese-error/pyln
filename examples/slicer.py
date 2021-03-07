@@ -9,20 +9,33 @@ def main():
         pyln.Box([-1, -1, -1], [1, 1, 1]), np.array([0.5, 0.5, 0.5])
     )
     size = 1024
-    for i in range(32):
+    slices = 64
+    images = []
+    for i in range(slices):
         plane = pyln.Plane(
-            np.array([0, 0, (i / (32 - 1)) * 2 - 1]), np.array([0, 0, 1])
+            np.array([0, 0, (i / (slices - 1)) * 2 - 1], dtype=np.float64),
+            np.array([0, 0, 1], dtype=np.float64),
         )
         paths = plane.intersect_mesh(mesh)
         paths = paths.transform(
-            np.dot(
+            pyln.utility.matrix_mul_matrix(
                 pyln.utility.vector_translate(
                     np.array([size / 2, size / 2, 0])
                 ),
                 pyln.utility.vector_scale(np.array([size / 2, size / 2, 1])),
             )
         )
-        paths.write_to_svg(f"examples/images/slice{i}.svg", size, size)
+        images.append(paths.to_image(size, size))
+
+    # save results
+    images[0].save(
+        "examples/images/slicer.gif",
+        save_all=True,
+        append_images=images[1:],
+        optimize=True,
+        duration=100,
+        loop=0,
+    )
 
 
 if __name__ == "__main__":
