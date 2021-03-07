@@ -241,7 +241,7 @@ class Paths:
     def __str__(self):
         return "\n".join(path.to_string() for path in self.paths)
 
-    def write_to_png(self, file_path: str, width, height):
+    def to_image(self, width, height):
         canvas = (int(width), int(height))
         im = Image.new("RGBA", canvas, (255, 255, 255, 255))
         draw = ImageDraw.Draw(im)
@@ -252,10 +252,13 @@ class Paths:
                 v2 = ps.path[i + 1]
                 draw.line(
                     (v1[0], height - v1[1], v2[0], height - v2[1]),
-                    fill=0,
+                    fill="black",
                     width=3,
                 )
-        im.save(file_path)
+        return im
+
+    def write_to_png(self, file_path: str, width, height):
+        self.to_image(width, height).save(file_path)
 
     def to_svg(self, width, height) -> str:
         lines = [
