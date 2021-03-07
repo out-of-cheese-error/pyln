@@ -19,6 +19,8 @@ from .shapes import (
     Cone,
     Cube,
     Cylinder,
+    Direction,
+    Function,
     Mesh,
     Op,
     OutlineCone,
@@ -54,4 +56,6 @@ __all__ = [
     "TransformedOutlineCone",
     "TransformedShape",
     "Triangle",
+    "Function",
+    "Direction",
 ]

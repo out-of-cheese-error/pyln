@@ -4,6 +4,7 @@
 
 **/*.stl
 .idea
+examples/images
 ### OSX ###
 # General
 .DS_Store
