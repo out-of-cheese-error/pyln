@@ -31,9 +31,10 @@ class TransformedShape(Shape):
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
     ) -> logic.Hit:
-        return self.shape.intersect(
-            utility.matrix_mul_ray(self.inverse, ray_origin, ray_direction)
+        origin, direction = utility.matrix_mul_ray(
+            self.inverse, ray_origin, ray_direction
         )
+        return self.shape.intersect(origin, direction)
 
     def paths(self) -> logic.Paths:
         return self.shape.paths().transform(self.matrix)
