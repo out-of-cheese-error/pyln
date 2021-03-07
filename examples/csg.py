@@ -27,6 +27,7 @@ def main():
             ),
         ],
     )
+    images = []
     for i in range(0, 90, 15):
         scene = pyln.Scene()
         matrix = pyln.utility.vector_rotate(
@@ -45,16 +46,24 @@ def main():
         height = 750  # rendered height
         fovy = 20.0  # vertical field of view, degrees
         znear = 0.1  # near z plane
-        zfar = 10.0  # far z plane
-        step = 0.005  # how finely to chop the paths for visibility testing
+        zfar = 100.0  # far z plane
+        step = 0.01  # how finely to chop the paths for visibility testing
 
         # compute 2D paths that depict the 3D scene
         paths = scene.render(
             eye, center, up, width, height, fovy, znear, zfar, step
         )
+        images.append(paths.to_image(width, height))
 
-        # save results
-        paths.write_to_svg(f"examples/images/csg_{i}.svg", width, height)
+    # save results
+    images[0].save(
+        "examples/images/csg.gif",
+        save_all=True,
+        append_images=images[1:],
+        optimize=True,
+        duration=40,
+        loop=0,
+    )
 
 
 if __name__ == "__main__":
