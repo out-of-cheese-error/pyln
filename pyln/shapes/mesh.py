@@ -5,7 +5,8 @@ from pathlib import Path
 import numpy as np
 
 from .. import Shape, __version__, logic, utility
-from . import Cube, Triangle
+from .cube import Cube
+from .triangle import Triangle
 
 
 class Mesh(Shape):
@@ -28,8 +29,10 @@ class Mesh(Shape):
     def contains(self, v: np.ndarray, f: float) -> bool:
         return False
 
-    def intersect(self, r: utility.Ray) -> logic.Hit:
-        return self.tree.intersect(r)
+    def intersect(
+        self, ray_origin: np.ndarray, ray_direction: np.ndarray
+    ) -> logic.Hit:
+        return self.tree.intersect(ray_origin, ray_direction)
 
     def paths(self) -> logic.Paths:
         result = []

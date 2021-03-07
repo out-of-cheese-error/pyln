@@ -1,3 +1,4 @@
+import numba as nb
 import numpy as np
 
 from .. import Shape, logic, utility
@@ -26,38 +27,53 @@ class Triangle(Shape):
     def contains(self, v: np.ndarray, f: float) -> bool:
         return False
 
-    def intersect(self, r: utility.Ray) -> logic.Hit:
-        e1 = self.v2 - self.v1
-        e2 = self.v3 - self.v1
-        px = r.direction[1] * e2[2] - r.direction[2] * e2[1]
-        py = r.direction[2] * e2[0] - r.direction[0] * e2[2]
-        pz = r.direction[0] * e2[1] - r.direction[1] * e2[0]
+    def intersect(
+        self, ray_origin: np.ndarray, ray_direction: np.ndarray
+    ) -> logic.Hit:
+        ok, root = Triangle._intersect(
+            self.v1, self.v2, self.v3, ray_origin, ray_direction
+        )
+        if ok:
+            return logic.Hit(self, root)
+        else:
+            return logic.NoHit
+
+    @staticmethod
+    @nb.njit(cache=True)
+    def _intersect(v1, v2, v3, ray_origin, ray_direction) -> (bool, float):
+        e1 = v2 - v1
+        e2 = v3 - v1
+        px = ray_direction[1] * e2[2] - ray_direction[2] * e2[1]
+        py = ray_direction[2] * e2[0] - ray_direction[0] * e2[2]
+        pz = ray_direction[0] * e2[1] - ray_direction[1] * e2[0]
         det = e1[0] * px + e1[1] * py + e1[2] * pz
 
         if -utility.EPS < det < utility.EPS:
-            return logic.NoHit
+            return False, 0
 
         inv = 1 / det
-        t = r.origin - self.v1
+        t = ray_origin - v1
         u = (t[0] * px + t[1] * py + t[2] * pz) * inv
 
         if u < 0.0 or u > 1.0:
-            return logic.NoHit
+            return False, 0
 
         qx = t[1] * e1[2] - t[2] * e1[1]
         qy = t[2] * e1[0] - t[0] * e1[2]
         qz = t[0] * e1[1] - t[1] * e1[0]
         v = (
-            r.direction[0] * qx + r.direction[1] * qy + r.direction[2] * qz
+            ray_direction[0] * qx
+            + ray_direction[1] * qy
+            + ray_direction[2] * qz
         ) * inv
 
         if v < 0.0 or (u + v) > 1.0:
-            return logic.NoHit
+            return False, 0
 
         d = (e2[0] * qx + e2[1] * qy + e2[2] * qz) * inv
         if d < utility.EPS:
-            return logic.NoHit
-        return logic.Hit(self, d)
+            return False, 0
+        return True, d
 
     def paths(self) -> logic.Paths:
         return logic.Paths(

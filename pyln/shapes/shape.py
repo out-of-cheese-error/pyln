@@ -25,8 +25,12 @@ class TransformedShape(Shape):
             utility.matrix_mul_position_vector(self.inverse, v), f
         )
 
-    def intersect(self, ray: utility.Ray) -> logic.Hit:
-        return self.shape.intersect(ray.mul_matrix(self.inverse))
+    def intersect(
+        self, ray_origin: np.ndarray, ray_direction: np.ndarray
+    ) -> logic.Hit:
+        return self.shape.intersect(
+            utility.matrix_mul_ray(self.inverse, ray_origin, ray_direction)
+        )
 
     def paths(self) -> logic.Paths:
         return self.shape.paths().transform(self.matrix)
@@ -69,15 +73,17 @@ class BooleanShape(Shape, logic.Filter):
             )
         return False
 
-    def intersect(self, ray: utility.Ray) -> logic.Hit:
-        hit_a = self.shape_a.intersect(ray)
-        hit_b = self.shape_b.intersect(ray)
+    def intersect(
+        self, ray_origin: np.ndarray, ray_direction: np.ndarray
+    ) -> logic.Hit:
+        hit_a = self.shape_a.intersect(ray_origin, ray_direction)
+        hit_b = self.shape_b.intersect(ray_origin, ray_direction)
         hit = hit_a.min(hit_b)
-        v = ray.position(hit.t)
+        v = ray_origin + (hit.t * ray_direction)
         if (not hit.ok()) or self.contains(v, 0.0):
             return hit
         return self.intersect(
-            utility.Ray(ray.position(hit.t + 0.01), ray.direction)
+            ray_origin + ((hit.t + 0.01) * ray_direction), ray_direction
         )
 
     def paths(self) -> logic.Paths:

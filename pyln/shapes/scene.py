@@ -19,13 +19,14 @@ class Scene(Shape):
     def add(self, shape):
         self.shapes.append(shape)
 
-    def intersect(self, r) -> logic.Hit:
-        return self.tree.intersect(r)
+    def intersect(
+        self, ray_origin: np.ndarray, ray_direction: np.ndarray
+    ) -> logic.Hit:
+        return self.tree.intersect(ray_origin, ray_direction)
 
     def visible(self, eye: np.ndarray, point: np.ndarray) -> bool:
         v = eye - point
-        r = utility.Ray(point, utility.vector_normalize(v))
-        hit = self.intersect(r)
+        hit = self.intersect(point, utility.vector_normalize(v))
         return hit.t >= utility.vector_length(v)
 
     def paths(self) -> logic.Paths:
@@ -61,8 +62,7 @@ class Scene(Shape):
         paths = self.paths()
         if step > 0:
             paths = paths.chop(step)
-        f = logic.ClipFilter(matrix, eye, self)
-        paths = paths.filter(f)
+        paths = paths.filter(logic.ClipFilter(matrix, eye, self))
         if step > 0:
             paths = paths.simplify(1e-6)
         translation = utility.vector_translate(np.array([1.0, 1.0, 0.0]))

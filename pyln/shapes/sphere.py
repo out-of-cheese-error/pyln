@@ -1,3 +1,4 @@
+import numba as nb
 import numpy as np
 
 from .. import Shape, logic, utility
@@ -20,10 +21,27 @@ class Sphere(Shape):
     def contains(self, v: np.ndarray, f) -> bool:
         return utility.vector_length(v - self.center) <= self.radius + f
 
-    def intersect(self, r: utility.Ray) -> logic.Hit:
-        radius = self.radius
-        to = r.origin - self.center
-        b = np.dot(to, r.direction)
+    def intersect(
+        self, ray_origin: np.ndarray, ray_direction: np.ndarray
+    ) -> logic.Hit:
+        ok, root = Sphere._intersect(
+            self.radius, self.center, ray_origin, ray_direction
+        )
+        if ok:
+            return logic.Hit(self, root)
+        else:
+            return logic.NoHit
+
+    @staticmethod
+    @nb.njit(cache=True)
+    def _intersect(
+        radius: float,
+        center: np.ndarray,
+        ray_origin: np.ndarray,
+        ray_direction: np.ndarray,
+    ) -> (bool, float):
+        to = ray_origin - center
+        b = np.dot(to, ray_direction)
         c = np.dot(to, to) - radius * radius
         d = b * b - c
 
@@ -31,13 +49,13 @@ class Sphere(Shape):
             d = np.sqrt(d)
             t1 = -b - d
             if t1 > 1e-2:
-                return logic.Hit(self, t1)
+                return True, t1
 
             t2 = -b + d
             if t2 > 1e-2:
-                return logic.Hit(self, t2)
+                return True, t2
 
-        return logic.NoHit
+        return False, 0
 
     def paths(self) -> logic.Paths:
         paths = []

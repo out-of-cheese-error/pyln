@@ -1,7 +1,8 @@
+import numba as nb
 import numpy as np
 
 from .. import Shape, logic, utility
-from . import TransformedShape
+from .shape import TransformedShape
 
 
 class Cylinder(Shape):
@@ -22,26 +23,45 @@ class Cylinder(Shape):
             return False
         return self.z0 - f <= v[2] <= self.z1 + f
 
-    def intersect(self, ray: utility.Ray) -> logic.Hit:
-        a = ray.direction[0] ** 2 + ray.direction[1] ** 2
-        b = (
-            2 * ray.origin[0] * ray.direction[0]
-            + 2 * ray.origin[1] * ray.direction[1]
+    def intersect(
+        self, ray_origin: np.ndarray, ray_direction: np.ndarray
+    ) -> logic.Hit:
+        ok, root = Cylinder._intersect(
+            self.radius, self.z0, self.z1, ray_origin, ray_direction
         )
-        c = ray.origin[0] ** 2 + ray.origin[1] ** 2 - self.radius ** 2
+        if ok:
+            return logic.Hit(self, root)
+        else:
+            return logic.NoHit
+
+    @staticmethod
+    @nb.njit(cache=True)
+    def _intersect(
+        radius: float,
+        z0: float,
+        z1: float,
+        ray_origin: np.ndarray,
+        ray_direction: np.ndarray,
+    ) -> (bool, float):
+        a = ray_direction[0] ** 2 + ray_direction[1] ** 2
+        b = (
+            2 * ray_origin[0] * ray_direction[0]
+            + 2 * ray_origin[1] * ray_direction[1]
+        )
+        c = ray_origin[0] ** 2 + ray_origin[1] ** 2 - radius ** 2
         slope = b * b - 4 * a * c
         if slope < 0:
-            return logic.NoHit
+            return False, 0
         slope = np.sqrt(slope)
         t0 = (-b + slope) / 2 * a
         t1 = (-b - slope) / 2 * a
         if t0 > t1:
             t0, t1 = t1, t0
         for root in [t0, t1]:
-            z = ray.origin[2] + root * ray.direction[2]
-            if root > 1e-6 and self.z0 < z < self.z1:
-                return logic.Hit(self, root)
-        return logic.NoHit
+            z = ray_origin[2] + root * ray_direction[2]
+            if root > 1e-6 and z0 < z < z1:
+                return True, root
+        return False, 0
 
     def paths(self) -> logic.Paths:
         result = []

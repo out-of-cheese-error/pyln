@@ -1,7 +1,8 @@
+import numba as nb
 import numpy as np
 
 from .. import Shape, logic, utility
-from . import TransformedShape
+from .shape import TransformedShape
 
 
 class Cone(Shape):
@@ -22,27 +23,45 @@ class Cone(Shape):
     def contains(self, v: np.ndarray, f: float) -> bool:
         return False
 
-    def intersect(self, ray: utility.Ray) -> logic.Hit:
-        k = self.radius / self.height
+    def intersect(
+        self, ray_origin: np.ndarray, ray_direction: np.ndarray
+    ) -> logic.Hit:
+        ok, root = Cone._intersect(
+            self.radius, self.height, ray_origin, ray_direction
+        )
+        if ok:
+            return logic.Hit(self, root)
+        else:
+            return logic.NoHit
+
+    @staticmethod
+    @nb.njit(cache=True)
+    def _intersect(
+        radius: float,
+        height: float,
+        ray_origin: np.ndarray,
+        ray_direction: np.ndarray,
+    ) -> (bool, float):
+        k = radius / height
         k *= k
         a = (
-            ray.direction[0] ** 2
-            - ray.direction[1] ** 2
-            - k * ray.direction[2] ** 2
+            ray_direction[0] ** 2
+            - ray_direction[1] ** 2
+            - k * ray_direction[2] ** 2
         )
         b = 2 * (
-            ray.direction[0] * ray.origin[0]
-            + ray.direction[1] * ray.origin[1]
-            - k * ray.direction[2] * (ray.origin[2] - self.height)
+            ray_direction[0] * ray_origin[0]
+            + ray_direction[1] * ray_origin[1]
+            - k * ray_direction[2] * (ray_origin[2] - height)
         )
         c = (
-            ray.origin[0] ** 2
-            + ray.origin[1] ** 2
-            - k * (ray.origin[2] - self.height) ** 2
+            ray_origin[0] ** 2
+            + ray_origin[1] ** 2
+            - k * (ray_origin[2] - height) ** 2
         )
         slope = b * b - 4 * a * c
         if slope <= 0:
-            return logic.NoHit
+            return False, 0
         slope = np.sqrt(slope)
         t0 = (-b + slope) / 2 * a
         t1 = (-b - slope) / 2 * a
@@ -50,10 +69,10 @@ class Cone(Shape):
             t0, t1 = t1, t0
         for root in [t0, t1]:
             if root > 1e-6:
-                p = ray.position(root)
-                if 0 < p[2] < self.height:
-                    return logic.Hit(self, root)
-        return logic.NoHit
+                p = ray_origin + (root * ray_direction)
+                if 0 < p[2] < height:
+                    return True, root
+        return False, 0
 
     def paths(self) -> logic.Paths:
         result = []

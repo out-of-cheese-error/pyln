@@ -3,7 +3,7 @@ import numpy as np
 import pyln
 
 
-@nb.njit
+@nb.njit(cache=True)
 def low_pass(values: np.ndarray, alpha: float):
     result = np.zeros_like(values)
     y = 0.0
@@ -13,14 +13,14 @@ def low_pass(values: np.ndarray, alpha: float):
     return result
 
 
-@nb.njit
+@nb.njit(cache=True)
 def normalize(values: np.ndarray, a: float, b: float):
     lo = np.amin(values)
     hi = np.amax(values)
     return ((values - lo) / (hi - lo)) * (b - a) + a
 
 
-@nb.njit
+@nb.njit(cache=True)
 def low_pass_noise(num: int, alpha: float, iterations: int):
     result = np.random.random(num)
     for i in range(iterations):

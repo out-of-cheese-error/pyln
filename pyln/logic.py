@@ -1,5 +1,6 @@
 from typing import List
 
+import numba as nb
 import numpy as np
 from PIL import Image, ImageDraw
 
@@ -48,9 +49,19 @@ class Box:
             np.minimum(self.min, other.min), np.maximum(self.max, other.max)
         )
 
-    def intersect(self, r: utility.Ray):
-        difference_min = (self.min - r.origin) / r.direction
-        difference_max = (self.max - r.origin) / r.direction
+    def intersect(self, ray_origin: np.ndarray, ray_direction: np.ndarray):
+        return Box._intersect(self.min, self.max, ray_origin, ray_direction)
+
+    @staticmethod
+    @nb.njit(cache=True)
+    def _intersect(
+        min_box: np.ndarray,
+        max_box: np.ndarray,
+        ray_origin: np.ndarray,
+        ray_direction: np.ndarray,
+    ) -> (float, float):
+        difference_min = (min_box - ray_origin) / ray_direction
+        difference_max = (max_box - ray_origin) / ray_direction
         t1 = np.amax(np.minimum(difference_min, difference_max))
         t2 = np.amin(np.maximum(difference_min, difference_max))
         return t1, t2
@@ -112,18 +123,6 @@ class ClipFilter(Filter):
         return w, True
 
 
-def segment_distance(p: np.ndarray, v: np.ndarray, w: np.ndarray):
-    l2 = utility.vector_squared_length(v - w)
-    if l2 == 0:
-        return utility.vector_length(p - v)
-    t = np.dot((p - v), (w - v)) / l2
-    if t < 0:
-        return utility.vector_length(p - v)
-    if t > 1:
-        return utility.vector_length(p - w)
-    return utility.vector_length((v + ((w - v) * t)) - p)
-
-
 class Path:
     def __init__(self, path=None):
         self.path: List[np.ndarray] = (
@@ -183,7 +182,7 @@ class Path:
         distance = 0.0
 
         for i in range(1, path_length - 1):
-            d = segment_distance(self.path[i], a, b)
+            d = utility.segment_distance(self.path[i], a, b)
             if d > distance:
                 index = i
                 distance = d
@@ -290,11 +289,11 @@ class Tree:
         node.split(0)
         return Tree(box, node)
 
-    def intersect(self, r: utility.Ray):
-        tmin, tmax = self.box.intersect(r)
+    def intersect(self, ray_origin: np.ndarray, ray_direction: np.ndarray):
+        tmin, tmax = self.box.intersect(ray_origin, ray_direction)
         if tmax < tmin or tmax <= 0:
             return NoHit
-        return self.root.intersect(r, tmin, tmax)
+        return self.root.intersect(ray_origin, ray_direction, tmin, tmax)
 
     def show_tree(self, level=0):
         return " " * level + "Tree\n" + self.root.show_tree(level + 1)
@@ -308,12 +307,15 @@ class Node:
         self.left = None
         self.right = None
 
-    def intersect(self, r: utility.Ray, tmin, tmax) -> Hit:
+    def intersect(
+        self, ray_origin: np.ndarray, ray_direction: np.ndarray, tmin, tmax
+    ) -> Hit:
         if self.axis is None:
-            return self.intersect_shapes(r)
-        tsplit = (self.point - r.origin[self.axis]) / r.direction[self.axis]
-        leftFirst = (r.origin[self.axis] < self.point) or (
-            r.origin[self.axis] == self.point and r.direction[self.axis] <= 0
+            return self.intersect_shapes(ray_origin, ray_direction)
+        tsplit = (self.point - ray_origin[self.axis]) / ray_direction[self.axis]
+        leftFirst = (ray_origin[self.axis] < self.point) or (
+            ray_origin[self.axis] == self.point
+            and ray_direction[self.axis] <= 0
         )
         if leftFirst:
             first = self.left
@@ -322,23 +324,27 @@ class Node:
             first = self.right
             second = self.left
         if tsplit > tmax or tsplit <= 0:
-            return first.intersect(r, tmin, tmax)
+            return first.intersect(ray_origin, ray_direction, tmin, tmax)
         elif tsplit < tmin:
-            return second.intersect(r, tmin, tmax)
+            return second.intersect(ray_origin, ray_direction, tmin, tmax)
         else:
-            h1 = first.intersect(r, tmin, tsplit)
+            h1 = first.intersect(ray_origin, ray_direction, tmin, tsplit)
             if h1.t <= tsplit:
                 return h1
-            h2 = second.intersect(r, tsplit, min(tmax, h1.t))
+            h2 = second.intersect(
+                ray_origin, ray_direction, tsplit, min(tmax, h1.t)
+            )
             if h1.t <= h2.t:
                 return h1
             else:
                 return h2
 
-    def intersect_shapes(self, r: utility.Ray) -> Hit:
+    def intersect_shapes(
+        self, ray_origin: np.ndarray, ray_direction: np.ndarray
+    ) -> Hit:
         hit = NoHit
         for shape in self.shapes:
-            h = shape.intersect(r)
+            h = shape.intersect(ray_origin, ray_direction)
             if h.t < hit.t:
                 hit = h
         return hit
@@ -427,7 +433,9 @@ class Shape:
     def contains(self, v: np.ndarray, f: float) -> bool:
         pass
 
-    def intersect(self, ray: utility.Ray) -> Hit:
+    def intersect(
+        self, ray_origin: np.ndarray, ray_direction: np.ndarray
+    ) -> Hit:
         pass
 
     def paths(self) -> Paths:

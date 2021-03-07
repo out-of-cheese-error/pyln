@@ -1,3 +1,4 @@
+import numba as nb
 import numpy as np
 
 from .. import Shape, logic, utility
@@ -25,16 +26,34 @@ class Cube(Shape):
                 return False
         return True
 
-    def intersect(self, r: utility.Ray) -> logic.Hit:
-        n = (self.min - r.origin) / r.direction
-        f = (self.max - r.origin) / r.direction
+    def intersect(
+        self, ray_origin: np.ndarray, ray_direction: np.ndarray
+    ) -> logic.Hit:
+        ok, root = Cube._intersect(
+            self.min, self.max, ray_origin, ray_direction
+        )
+        if ok:
+            return logic.Hit(self, root)
+        else:
+            return logic.NoHit
+
+    @staticmethod
+    @nb.njit(cache=True)
+    def _intersect(
+        min_box: np.ndarray,
+        max_box: np.ndarray,
+        ray_origin: np.ndarray,
+        ray_direction: np.ndarray,
+    ) -> (bool, float):
+        n = (min_box - ray_origin) / ray_direction
+        f = (max_box - ray_origin) / ray_direction
         n, f = np.minimum(n, f), np.maximum(n, f)
         t0, t1 = np.amax(n), np.amin(f)
         if t0 < 1e-3 < t1:
-            return logic.Hit(self, t1)
+            return True, t1
         if 1e-3 <= t0 < t1:
-            return logic.Hit(self, t0)
-        return logic.NoHit
+            return True, t0
+        return False, 0
 
     def paths(self) -> logic.Paths:
         x1, y1, z1 = self.min[0], self.min[1], self.min[2]

@@ -25,7 +25,7 @@ class StripedCube(pyln.Cube):
 def main():
     pyln.utility.compile_numba()
     scene = pyln.Scene()
-    n = 15
+    n = 5
     for x in np.arange(-n, n):
         for y in np.arange(-n, n):
             if x == 2 and y == 1:
