@@ -1,23 +1,18 @@
-import numba as nb
 import numpy as np
 import pyln
-
-
-@nb.njit
-def function(x: float, y: float) -> float:
-    if x < pyln.utility.EPS and y < pyln.utility.EPS:
-        return pyln.utility.INF
-    return -1 / (x * x + y * y)
 
 
 def main():
     # compile
     pyln.utility.compile_numba()
-    function(1.0, 1.0)
 
     scene = pyln.Scene()
     box = pyln.Box([-2, -2, -4], [2, 2, 2])
-    scene.add(pyln.Function(function, box, pyln.Direction.Below))
+    scene.add(
+        pyln.Function(
+            lambda x, y: -1 / (x * x + y * y), box, pyln.Direction.Below
+        )
+    )
 
     # define camera parameters
     eye = np.array([3, 0, 3], dtype=np.float64)  # camera position
