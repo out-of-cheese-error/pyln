@@ -40,7 +40,7 @@ jobs:
         source "$HOME/.poetry/env"
         STRICT=0 make check-style
 
-    - name: Run tests
-      run: |
-        source "$HOME/.poetry/env"
-        make test
+#    - name: Run tests
+#      run: |
+#        source "$HOME/.poetry/env"
+#        make test

@@ -1,20 +1,23 @@
+import typing as ty
+
 import datetime
 import struct
 from pathlib import Path
 
 import numpy as np
 
-from .. import Shape, __version__, logic, utility
+from .. import __version__, logic, utility
 from .cube import Cube
+from .shape import Shape
 from .triangle import Triangle
 
 
 class Mesh(Shape):
-    def __init__(self, triangles):
+    def __init__(self, triangles: ty.List[Triangle]):
         super().__init__()
-        self.triangles = triangles
-        self.tree = None
-        self.box = logic.Box.BoxForShapes(self.triangles)
+        self.triangles: ty.List[Triangle] = triangles
+        self.tree: ty.Union[logic.Tree, None] = None
+        self.box: logic.Box = logic.Box.BoxForShapes(self.triangles)
 
     def compile(self):
         if self.tree is None:
@@ -80,7 +83,7 @@ class Mesh(Shape):
     def show_tree(self, level=0):
         return " " * level + "Mesh\n" + self.tree.show_tree(level + 1)
 
-    def voxelize(self, size: float) -> [Cube]:
+    def voxelize(self, size: float) -> ty.List[Cube]:
         vector_set = set()
         for z in np.arange(self.box.min[2], self.box.max[2] + 1, size):
             plane = Plane(
@@ -95,7 +98,7 @@ class Mesh(Shape):
         return [Cube(v - (size / 2), v + (size / 2)) for v in vector_set]
 
     @classmethod
-    def from_obj(cls, path: str):
+    def from_obj(cls, path: str) -> "Mesh":
         def parse_index(value: str, length: int) -> int:
             vi = value.split("/")
             n = int(vi[0])
@@ -123,7 +126,7 @@ class Mesh(Shape):
         return Mesh(triangles)
 
     @classmethod
-    def from_stl(cls, path: str):
+    def from_stl(cls, path: str) -> "Mesh":
         vertexes = []
         with open(path) as file:
             for line in file:
@@ -140,7 +143,7 @@ class Mesh(Shape):
         return Mesh(triangles)
 
     @classmethod
-    def from_binary_stl(cls, path: str):
+    def from_binary_stl(cls, path: str) -> "Mesh":
         stl = Stl.from_file(path)
         triangles = []
         for v0, v1, v2 in zip(stl.data["v0"], stl.data["v1"], stl.data["v2"]):
@@ -153,7 +156,7 @@ class Mesh(Shape):
             )
         return Mesh(triangles)
 
-    def to_binary_stl(self, path: str):
+    def write_binary_stl(self, path: str):
         # Format the header
         header = (
             f"pyln ({__version__}) {datetime.datetime.now()} {Path(path).stem}"
@@ -208,7 +211,7 @@ class Plane:
 
     def intersect_segment(
         self, v0: np.ndarray, v1: np.ndarray
-    ) -> (np.ndarray, bool):
+    ) -> ty.Tuple[ty.Union[None, np.ndarray], bool]:
         u = v1 - v0
         w = v0 - self.point
         d = self.normal.dot(u)
@@ -221,7 +224,7 @@ class Plane:
 
     def intersect_triangle(
         self, triangle: Triangle
-    ) -> (np.ndarray, np.ndarray, bool):
+    ) -> ty.Tuple[ty.Union[None, np.ndarray], ty.Union[None, np.ndarray], bool]:
         v1, ok1 = self.intersect_segment(triangle.v1, triangle.v2)
         v2, ok2 = self.intersect_segment(triangle.v2, triangle.v3)
         v3, ok3 = self.intersect_segment(triangle.v3, triangle.v1)

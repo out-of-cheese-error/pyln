@@ -1,4 +1,4 @@
-from typing import List
+import typing as ty
 
 import numba as nb
 import numpy as np
@@ -8,19 +8,23 @@ from . import utility
 
 
 class Box:
-    def __init__(self, min_box, max_box):
+    def __init__(
+        self,
+        min_box: ty.Union[ty.List[float], np.ndarray],
+        max_box: ty.Union[ty.List[float], np.ndarray],
+    ):
         self.box = np.array([min_box, max_box], dtype=np.float64)
 
-    @staticmethod
-    def BoxForShapes(shapes: ["Shape"]):
+    @classmethod
+    def BoxForShapes(cls, shapes: ty.List["Shape"]) -> "Box":
         assert len(shapes)
         box = shapes[0].bounding_box()
         for shape in shapes:
             box = box.extend(shape.bounding_box())
         return box
 
-    @staticmethod
-    def BoxForVectors(vectors: [np.ndarray]):
+    @classmethod
+    def BoxForVectors(cls, vectors: ty.List[np.ndarray]) -> "Box":
         assert len(vectors)
         return Box(np.min(vectors, axis=0), np.max(vectors, axis=0))
 
@@ -49,7 +53,9 @@ class Box:
             np.minimum(self.min, other.min), np.maximum(self.max, other.max)
         )
 
-    def intersect(self, ray_origin: np.ndarray, ray_direction: np.ndarray):
+    def intersect(
+        self, ray_origin: np.ndarray, ray_direction: np.ndarray
+    ) -> ty.Tuple[float, float]:
         return Box._intersect(self.min, self.max, ray_origin, ray_direction)
 
     @staticmethod
@@ -59,14 +65,14 @@ class Box:
         max_box: np.ndarray,
         ray_origin: np.ndarray,
         ray_direction: np.ndarray,
-    ) -> (float, float):
+    ) -> ty.Tuple[float, float]:
         difference_min = (min_box - ray_origin) / ray_direction
         difference_max = (max_box - ray_origin) / ray_direction
         t1 = np.amax(np.minimum(difference_min, difference_max))
         t2 = np.amin(np.maximum(difference_min, difference_max))
         return t1, t2
 
-    def partition(self, axis: int, point) -> (bool, bool):
+    def partition(self, axis: int, point) -> ty.Tuple[bool, bool]:
         return self.min[axis] <= point, self.max[axis] >= point
 
     def __str__(self):
@@ -102,8 +108,8 @@ class Filter:
     def __init__(self):
         pass
 
-    def filter(self, v: np.ndarray) -> (np.ndarray, bool):
-        return None, None
+    def filter(self, v: np.ndarray) -> ty.Tuple[np.ndarray, bool]:
+        return None, False
 
 
 class ClipFilter(Filter):
@@ -114,7 +120,7 @@ class ClipFilter(Filter):
         self.scene = scene
         self.clip_box = Box([-1, -1, -1], [1, 1, 1])
 
-    def filter(self, v: np.ndarray) -> (np.ndarray, bool):
+    def filter(self, v: np.ndarray) -> ty.Tuple[np.ndarray, bool]:
         w = utility.matrix_mul_position_vector(self.matrix, v, True)
         if not self.scene.visible(self.eye, v):
             return w, False
@@ -125,7 +131,7 @@ class ClipFilter(Filter):
 
 class Path:
     def __init__(self, path=None):
-        self.path: List[np.ndarray] = (
+        self.path: ty.List[np.ndarray] = (
             [np.array(p) for p in path] if path is not None else []
         )
 
@@ -223,10 +229,10 @@ class Paths:
             box = box.extend(path.bounding_box())
         return box
 
-    def transform(self, matrix: np.ndarray):
+    def transform(self, matrix: np.ndarray) -> "Paths":
         return Paths([path.transform(matrix) for path in self.paths])
 
-    def chop(self, step):
+    def chop(self, step) -> "Paths":
         return Paths([path.chop(step) for path in self.paths])
 
     def filter(self, f: Filter):

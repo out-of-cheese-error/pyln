@@ -1,8 +1,10 @@
+import typing as ty
+
 import numba as nb
 import numpy as np
 
-from .. import Shape, logic, utility
-from .shape import TransformedShape
+from .. import logic, utility
+from .shape import Shape, TransformedShape
 
 
 class Cylinder(Shape):
@@ -42,7 +44,7 @@ class Cylinder(Shape):
         z1: float,
         ray_origin: np.ndarray,
         ray_direction: np.ndarray,
-    ) -> (bool, float):
+    ) -> ty.Tuple[bool, float]:
         a = ray_direction[0] ** 2 + ray_direction[1] ** 2
         b = (
             2 * ray_origin[0] * ray_direction[0]
@@ -121,7 +123,7 @@ class OutlineCylinder(Cylinder):
         v0: np.ndarray,
         v1: np.ndarray,
         radius: float,
-    ):
+    ) -> TransformedShape:
         d = v1 - v0
         a = np.arccos(np.dot(utility.vector_normalize(d), up))
         matrix = utility.vector_translate(v0)

@@ -1,7 +1,8 @@
 import numba as nb
 import numpy as np
 
-from .. import Shape, logic, utility
+from .. import logic, utility
+from .shape import Shape
 
 
 class Triangle(Shape):

@@ -1,3 +1,5 @@
+import typing as ty
+
 import numba as nb
 import numpy as np
 
@@ -8,7 +10,7 @@ INF = 1e9
 @nb.njit(cache=True)
 def matrix_mul_ray(
     matrix: np.ndarray, ray_origin: np.ndarray, ray_direction: np.ndarray
-) -> (np.ndarray, np.ndarray):
+) -> ty.Tuple[np.ndarray, np.ndarray]:
     return (
         matrix_mul_position_vector(matrix, ray_origin),
         matrix_mul_direction_vector(matrix, ray_direction),
@@ -57,23 +59,25 @@ def vector_scale(vector):
 
 
 @nb.njit(cache=True)
-def vector_length(v: np.ndarray):
+def vector_length(v: np.ndarray) -> float:
     return np.sqrt(np.sum(v ** 2.0, axis=-1))
 
 
 @nb.njit(cache=True)
-def vector_squared_length(v: np.ndarray):
+def vector_squared_length(v: np.ndarray) -> float:
     return np.sum(v ** 2.0, axis=-1)
 
 
 @nb.njit(cache=True)
-def vector_normalize(v):
+def vector_normalize(v: np.ndarray) -> np.ndarray:
     length = vector_length(v)
     return v / length
 
 
 @nb.njit(cache=True)
-def matrix_mul_position_vector(matrix, vector, normalize=False) -> np.ndarray:
+def matrix_mul_position_vector(
+    matrix: np.ndarray, vector: np.ndarray, normalize: bool = False
+) -> np.ndarray:
     output = np.array(
         [vector[0], vector[1], vector[2], 1.0], dtype=vector.dtype
     )
@@ -84,7 +88,9 @@ def matrix_mul_position_vector(matrix, vector, normalize=False) -> np.ndarray:
 
 
 @nb.njit(cache=True)
-def matrix_mul_direction_vector(matrix, vector) -> np.ndarray:
+def matrix_mul_direction_vector(
+    matrix: np.ndarray, vector: np.ndarray
+) -> np.ndarray:
     x = (
         matrix[0, 0] * vector[0]
         + matrix[0, 1] * vector[1]
@@ -156,7 +162,7 @@ def frustum(left, right, bottom, top, near, far):
 @nb.njit(cache=True)
 def matrix_mul_box(
     matrix: np.ndarray, min_box: np.ndarray, max_box: np.ndarray
-) -> (np.ndarray, np.ndarray):
+) -> ty.Tuple[np.ndarray, np.ndarray]:
     # http://dev.theomader.com/transform-bounding-boxes/
     r = matrix[:3, 0]
     u = matrix[:3, 1]
@@ -188,7 +194,7 @@ def matrix_inverse(matrix: np.ndarray) -> np.ndarray:
 
 
 @nb.njit(cache=True)
-def segment_distance(p: np.ndarray, v: np.ndarray, w: np.ndarray):
+def segment_distance(p: np.ndarray, v: np.ndarray, w: np.ndarray) -> float:
     l2 = vector_squared_length(v - w)
     if l2 == 0:
         return vector_length(p - v)

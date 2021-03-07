@@ -1,8 +1,10 @@
+import typing as ty
+
 import numba as nb
 import numpy as np
 
-from .. import Shape, logic, utility
-from .shape import TransformedShape
+from .. import logic, utility
+from .shape import Shape, TransformedShape
 
 
 class Cone(Shape):
@@ -41,7 +43,7 @@ class Cone(Shape):
         height: float,
         ray_origin: np.ndarray,
         ray_direction: np.ndarray,
-    ) -> (bool, float):
+    ) -> ty.Tuple[bool, float]:
         k = radius / height
         k *= k
         a = (
