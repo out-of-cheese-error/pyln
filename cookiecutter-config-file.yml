@@ -1,0 +1,10 @@
+# This file contains values from Cookiecutter
+
+default_context:
+  project_name: "pyln"
+  project_description: "3D line art engine (based on ln)"
+  organization: "out-of-cheese-error"
+  license: "MIT"
+  version: "0.1.0"
+  github_name: "out-of-cheese-error"
+  email: "justacythonblog@gmail.com"
