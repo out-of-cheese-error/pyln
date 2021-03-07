@@ -4,6 +4,7 @@ from pyln import BooleanShape, Op
 
 
 def main():
+    pyln.utility.compile_numba()
     shape = BooleanShape.from_shapes(
         Op.Difference,
         [
@@ -26,7 +27,7 @@ def main():
             ),
         ],
     )
-    for i in range(0, 90, 5):
+    for i in range(0, 90, 15):
         scene = pyln.Scene()
         matrix = pyln.utility.vector_rotate(
             np.array([0, 0, 1], dtype=np.float64), np.deg2rad(i)
@@ -45,17 +46,15 @@ def main():
         fovy = 20.0  # vertical field of view, degrees
         znear = 0.1  # near z plane
         zfar = 10.0  # far z plane
-        step = 0.01  # how finely to chop the paths for visibility testing
+        step = 0.005  # how finely to chop the paths for visibility testing
 
         # compute 2D paths that depict the 3D scene
         paths = scene.render(
             eye, center, up, width, height, fovy, znear, zfar, step
         )
-        print(i, len(paths.paths))
 
         # save results
-        if len(paths.paths):
-            paths.write_to_svg(f"examples/images/csg_{i}.svg", width, height)
+        paths.write_to_svg(f"examples/images/csg_{i}.svg", width, height)
 
 
 if __name__ == "__main__":

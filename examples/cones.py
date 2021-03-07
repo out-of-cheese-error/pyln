@@ -95,12 +95,13 @@ class ConeTree(pyln.TransformedOutlineCone):
 
 
 def main():
+    pyln.utility.compile_numba()
     # define camera parameters
     eye = np.array([0, 0, 0])  # camera position
     center = np.array([0.5, 0, 8])  # camera looks at
     up = np.array([0, 0, 1])  # up direction
 
-    # create a scene and add a single cube
+    # create a scene
     scene = pyln.Scene()
     n = 9.0
     points = poisson_disc(-n, -n, n, n, 2, 32)
@@ -126,7 +127,7 @@ def main():
     )
 
     # save results
-    paths.write_to_svg("out.svg", width, height)
+    paths.write_to_svg("examples/images/cones.svg", width, height)
 
 
 if __name__ == "__main__":

@@ -29,6 +29,7 @@ def low_pass_noise(num: int, alpha: float, iterations: int):
 
 
 def main():
+    pyln.utility.compile_numba()
     # define camera parameters
     eye = np.array([8.0, 8.0, 8.0])  # camera position
     center = np.array([0.0, 0.0, 0.0])  # camera looks at
@@ -57,7 +58,7 @@ def main():
     )
 
     # save results
-    paths.write_to_svg("out.svg", width, height)
+    paths.write_to_svg("examples/images/beads.svg", width, height)
 
 
 if __name__ == "__main__":

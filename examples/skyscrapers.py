@@ -3,6 +3,7 @@ import pyln
 
 
 def main():
+    pyln.utility.compile_numba()
     scene = pyln.Scene()
     n = 15
     for x in np.arange(-n, n):
@@ -33,7 +34,7 @@ def main():
     )
 
     # save results
-    paths.write_to_svg("out.svg", width, height)
+    paths.write_to_svg("examples/images/skyscrapers.svg", width, height)
 
 
 if __name__ == "__main__":

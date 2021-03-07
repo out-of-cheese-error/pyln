@@ -3,6 +3,7 @@ import pyln
 
 
 def main():
+    pyln.utility.compile_numba()
     # create a scene and add a bunch of cubes
     scene = pyln.Scene()
     for x in np.arange(-2, 2, 1):
@@ -30,7 +31,7 @@ def main():
     )
 
     # save results
-    paths.write_to_svg("out.svg", width, height)
+    paths.write_to_svg("examples/images/cubes.svg", width, height)
 
 
 if __name__ == "__main__":

@@ -3,7 +3,8 @@ import pyln
 
 
 def main():
-    # create a scene and add a single cube
+    pyln.utility.compile_numba()
+    # create a scene
     scene = pyln.Scene()
     mesh = pyln.Mesh.from_obj("examples/suzanne.obj")
     mesh.unit_cube()
@@ -35,7 +36,7 @@ def main():
     )
 
     # save results
-    paths.write_to_svg("out.svg", width, height)
+    paths.write_to_svg("examples/images/suzanne.svg", width, height)
 
 
 if __name__ == "__main__":

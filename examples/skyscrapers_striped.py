@@ -56,7 +56,7 @@ def main():
     )
 
     # save results
-    paths.write_to_svg("out.svg", width, height)
+    paths.write_to_svg("examples/images/skyscrapers_striped.svg", width, height)
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@ import pyln
 
 
 def main():
+    pyln.utility.compile_numba()
     mesh = pyln.Mesh.from_obj("examples/suzanne.obj")
     mesh.fit_inside(
         pyln.Box([-1, -1, -1], [1, 1, 1]), np.array([0.5, 0.5, 0.5])
@@ -21,7 +22,7 @@ def main():
                 pyln.utility.vector_scale(np.array([size / 2, size / 2, 1])),
             )
         )
-        paths.write_to_svg(f"slice{i}.svg", size, size)
+        paths.write_to_svg(f"examples/images/slice{i}.svg", size, size)
 
 
 if __name__ == "__main__":

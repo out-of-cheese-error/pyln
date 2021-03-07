@@ -3,6 +3,7 @@ import pyln
 
 
 def main():
+    pyln.utility.compile_numba()
     # create a scene and add a single cube
     scene = pyln.Scene()
     scene.add(pyln.Cube([-1, -1, -1], [1, 1, 1]))
@@ -24,10 +25,8 @@ def main():
     paths = scene.render(
         eye, center, up, width, height, fovy, znear, zfar, step
     )
-    print(paths, len(paths.paths))
     # save results
-    paths.write_to_svg("out.svg", width, height)
-    paths.write_to_png("out.png", width, height)
+    paths.write_to_svg("examples/images/cube.svg", width, height)
 
 
 if __name__ == "__main__":

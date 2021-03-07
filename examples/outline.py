@@ -3,6 +3,7 @@ import pyln
 
 
 def main():
+    pyln.utility.compile_numba()
     # define camera parameters
     eye = np.array([8, 8, 8], dtype=np.float64)  # camera position
     center = np.array([0, 0, 0], dtype=np.float64)  # camera looks at
@@ -31,7 +32,7 @@ def main():
     )
 
     # save results
-    paths.write_to_svg("outline.svg", width, height)
+    paths.write_to_svg("examples/images/outline.svg", width, height)
 
 
 if __name__ == "__main__":
