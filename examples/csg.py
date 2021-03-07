@@ -1,40 +1,22 @@
 import numpy as np
 import pyln
-from pyln import BooleanShape, Op
 
 
 def main():
     pyln.utility.compile_numba()
-    shape = BooleanShape.from_shapes(
-        Op.Difference,
-        [
-            BooleanShape.from_shapes(
-                Op.Intersection,
-                [pyln.Sphere(), pyln.Cube([-0.8, -0.8, -0.8], [0.8, 0.8, 0.8])],
-            ),
-            pyln.Cylinder(0.4, -2.0, 2.0),
-            pyln.TransformedShape(
-                pyln.Cylinder(0.4, -2.0, -2.0),
-                pyln.utility.vector_rotate(
-                    np.array([1.0, 0.0, 0.0]), np.deg2rad(90)
-                ),
-            ),
-            pyln.TransformedShape(
-                pyln.Cylinder(0.4, -2.0, 2.0),
-                pyln.utility.vector_rotate(
-                    np.array([0.0, 1.0, 0.0]), np.deg2rad(90)
-                ),
-            ),
-        ],
+    sphere = pyln.Sphere(texture=1)
+    cube = pyln.StripedCube([-0.8, -0.8, -0.8], [0.8, 0.8, 0.8], 20)
+    cylinder = pyln.Cylinder(0.4, -2.0, 2.0)
+    shape = (
+        (sphere * cube)
+        - cylinder
+        - cylinder.rotate_x(90)
+        - cylinder.rotate_y(90)
     )
     images = []
-    for i in range(0, 90, 15):
+    for index, i in enumerate(range(0, 90, 10)):
         scene = pyln.Scene()
-        matrix = pyln.utility.vector_rotate(
-            np.array([0, 0, 1], dtype=np.float64), np.deg2rad(i)
-        )
-        scene.add(pyln.TransformedShape(shape, matrix))
-        scene.add(shape)
+        scene.add(shape.rotate_z(i))
 
         # define camera parameters
         eye = np.array([0, 6, 2], dtype=np.float64)  # camera position
@@ -61,7 +43,7 @@ def main():
         save_all=True,
         append_images=images[1:],
         optimize=True,
-        duration=40,
+        duration=100,
         loop=0,
     )
 
