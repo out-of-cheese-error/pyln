@@ -144,7 +144,13 @@ class Mesh(Shape):
         stl = Stl.from_file(path)
         triangles = []
         for v0, v1, v2 in zip(stl.data["v0"], stl.data["v1"], stl.data["v2"]):
-            triangles.append(Triangle(v0, v1, v2))
+            triangles.append(
+                Triangle(
+                    v0.astype(np.float64),
+                    v1.astype(np.float64),
+                    v2.astype(np.float64),
+                )
+            )
         return Mesh(triangles)
 
     def to_binary_stl(self, path: str):
@@ -155,9 +161,9 @@ class Mesh(Shape):
         # Make it exactly 80 characters
         header = header[:80].ljust(80, " ")
         data = np.zeros(len(self.triangles), dtype=Stl.dtype)
-        data["v0"] = [t.v1 for t in self.triangles]
-        data["v1"] = [t.v2 for t in self.triangles]
-        data["v2"] = [t.v3 for t in self.triangles]
+        data["v0"] = [t.v1.astype(np.float32) for t in self.triangles]
+        data["v1"] = [t.v2.astype(np.float32) for t in self.triangles]
+        data["v2"] = [t.v3.astype(np.float32) for t in self.triangles]
         Stl(header, data).to_file(path)
 
 
@@ -165,10 +171,10 @@ class Stl:
     # from https://w.wol.ph/2014/10/11/reading-writing-binary-stl-files-numpy/
     dtype = np.dtype(
         [
-            ("normals", np.float64, (3,)),
-            ("v0", np.float64, (3,)),
-            ("v1", np.float64, (3,)),
-            ("v2", np.float64, (3,)),
+            ("normals", np.float32, (3,)),
+            ("v0", np.float32, (3,)),
+            ("v1", np.float32, (3,)),
+            ("v2", np.float32, (3,)),
             ("attr", "u2", (1,)),
         ]
     )
