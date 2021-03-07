@@ -8,14 +8,7 @@ def main():
     scene = pyln.Scene()
     mesh = pyln.Mesh.from_obj("examples/suzanne.obj")
     mesh.unit_cube()
-    scene.add(
-        pyln.TransformedShape(
-            mesh,
-            pyln.utility.vector_rotate(
-                np.array([0, 1, 0], dtype=np.float64), 0.5
-            ),
-        )
-    )
+    scene.add(mesh.rotate_y(30))
 
     # define camera parameters
     eye = np.array([-0.5, 0.5, 2], dtype=np.float64)  # camera position
@@ -36,7 +29,9 @@ def main():
     )
 
     # save results
-    paths.write_to_svg("examples/images/suzanne.svg", width, height)
+    paths.write_to_svg(
+        "examples/images/suzanne.svg", width, height, background_color="white"
+    )
 
 
 if __name__ == "__main__":

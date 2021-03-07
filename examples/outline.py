@@ -32,7 +32,9 @@ def main():
     )
 
     # save results
-    paths.write_to_svg("examples/images/outline.svg", width, height)
+    paths.write_to_svg(
+        "examples/images/outline.svg", width, height, background_color="white"
+    )
 
 
 if __name__ == "__main__":

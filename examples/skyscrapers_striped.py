@@ -2,26 +2,6 @@ import numpy as np
 import pyln
 
 
-class StripedCube(pyln.Cube):
-    def __init__(self, min_box, max_box, stripes: int):
-        super().__init__(min_box, max_box)
-        self.stripes = stripes
-
-    def paths(self) -> pyln.Paths:
-        paths = []
-        x1, y1, z1 = self.min[0], self.min[1], self.min[2]
-        x2, y2, z2 = self.max[0], self.max[1], self.max[2]
-        for i in range(self.stripes):
-            p = i / 10
-            x = x1 + (x2 - x1) * p
-            y = y1 + (y2 - y1) * p
-            paths.append([[x, y1, z1], [x, y1, z2]])
-            paths.append([[x, y2, z1], [x, y2, z2]])
-            paths.append([[x1, y, z1], [x1, y, z2]])
-            paths.append([[x2, y, z1], [x2, y, z2]])
-        return pyln.Paths(paths)
-
-
 def main():
     pyln.utility.compile_numba()
     scene = pyln.Scene()
@@ -35,7 +15,7 @@ def main():
             fy = y + (np.random.random() * 0.5 - 0.25)
             fz = np.random.random() * 3 + 1
             scene.add(
-                StripedCube([fx - p, fy - p, 0], [fx + p, fy + p, fz], 10)
+                pyln.StripedCube([fx - p, fy - p, 0], [fx + p, fy + p, fz], 10)
             )
     # define camera parameters
     eye = np.array([1.75, 1.25, 6], dtype=np.float64)  # camera position
@@ -56,7 +36,12 @@ def main():
     )
 
     # save results
-    paths.write_to_svg("examples/images/skyscrapers_striped.svg", width, height)
+    paths.write_to_svg(
+        "examples/images/skyscrapers_striped.svg",
+        width,
+        height,
+        background_color="white",
+    )
 
 
 if __name__ == "__main__":

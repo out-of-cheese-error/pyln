@@ -32,7 +32,9 @@ def main():
         eye, center, up, width, height, fovy, znear, zfar, step
     )
     # save results
-    paths.write_to_svg("examples/images/function.svg", width, height)
+    paths.write_to_svg(
+        "examples/images/function.svg", width, height, background_color="white"
+    )
 
 
 if __name__ == "__main__":

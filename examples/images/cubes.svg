@@ -1,4 +1,4 @@
-<svg width="1920" height="1200" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg">
+<svg width="1920" height="1200" style="background-color:white" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg">
 <g transform="translate(0,1200) scale(1,-1)">
 <polyline stroke="black" fill="none" points="896.1695843197016,1072.0644366012089 1054.38579265433,1050.2516609741508" />
 <polyline stroke="black" fill="none" points="896.1695843197016,1072.0644366012089 855.8764107094654,1064.484527650464" />
