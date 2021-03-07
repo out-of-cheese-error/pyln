@@ -12,6 +12,25 @@
 ## a (WIP) Python 3D line art engine
 This is a complete Python port of [fogleman/ln](https://github.com/fogleman/ln) (with some help from [ln.py](https://github.com/ksons/ln.py)) using NumPy, Numba, and Pillow.
 
+Constructive Solid Geometry (CSG) is quite intuitive:
+
+```python
+import pyln
+
+sphere = pyln.Sphere()
+cube = pyln.Cube([-0.8, -0.8, -0.8], [0.8, 0.8, 0.8], 20)
+cylinder = pyln.Cylinder(0.4, -2.0, 2.0)
+shape = (
+    (sphere * cube)
+    - cylinder
+    - cylinder.rotate_x(90)
+    - cylinder.rotate_y(90)
+)
+```
+
+[Rotate and render as a GIF](examples/csg.py):
+![csg](examples/images/csg.gif)
+
 ### Examples
 Images rendered from the scripts in the [examples folder](examples):
 
@@ -27,9 +46,6 @@ Images rendered from the scripts in the [examples folder](examples):
 [comment]: <> (#### [Beads]&#40;examples/beads.py&#41;)
 
 [comment]: <> (![beads]&#40;examples/images/beads.svg&#41;)
-
-#### [CSG (Constructive Solid Geometry)](examples/csg.py)
-![csg](examples/images/csg.gif)
 
 #### [Outline](examples/outline.py)
 ![outline](examples/images/outline.svg)
@@ -50,6 +66,12 @@ Images rendered from the scripts in the [examples folder](examples):
 #### [Suzanne (voxelized, from .stl file)](examples/voxelize.py)
 ![voxelize](examples/images/voxelize.svg)
 
+#### [Suzanne (sliced)](examples/slicer.py)
+![sliced](examples/images/slicer.gif)
+
 ## Credits
+Original Go implementation:  https://github.com/fogleman/ln
+
+Another Python implementation that's partially complete: https://github.com/ksons/ln.py
 
 This project was generated with [`python-package-template`](https://github.com/TezRomacH/python-package-template).
