@@ -4,10 +4,9 @@ import numba as nb
 import numpy as np
 
 from .. import logic, utility
-from .shape import Shape, TransformedShape
 
 
-class Cylinder(Shape):
+class Cylinder(logic.Shape):
     def __init__(self, radius: float, z0: float, z1: float):
         super().__init__()
         self.radius = radius
@@ -37,7 +36,10 @@ class Cylinder(Shape):
             return logic.NoHit
 
     @staticmethod
-    @nb.njit(cache=True)
+    @nb.njit(
+        "Tuple((boolean, float64))(float64, float64, float64, float64[:], float64[:])",
+        cache=True,
+    )
     def _intersect(
         radius: float,
         z0: float,
@@ -123,7 +125,7 @@ class OutlineCylinder(Cylinder):
         v0: np.ndarray,
         v1: np.ndarray,
         radius: float,
-    ) -> TransformedShape:
+    ) -> logic.TransformedShape:
         d = v1 - v0
         a = np.arccos(np.dot(utility.vector_normalize(d), up))
         matrix = utility.vector_translate(v0)
@@ -141,4 +143,4 @@ class OutlineCylinder(Cylinder):
             0,
             utility.vector_length(d),
         )
-        return TransformedShape(outline_cylinder, matrix)
+        return logic.TransformedShape(outline_cylinder, matrix)

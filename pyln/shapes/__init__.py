@@ -1,19 +1,18 @@
 from .cone import Cone, OutlineCone, TransformedOutlineCone
-from .cube import Cube
+from .cube import Cube, StripedCube
 from .cylinder import Cylinder, OutlineCylinder
+from .function import Direction, Function
 from .mesh import Mesh, Plane
 from .scene import Scene
-from .shape import BooleanShape, Direction, Function, Op, TransformedShape
 from .sphere import OutlineSphere, Sphere
 from .triangle import Triangle
 
 __all__ = [
-    "BooleanShape",
     "Cone",
     "Cube",
+    "StripedCube",
     "Cylinder",
     "Mesh",
-    "Op",
     "OutlineCone",
     "OutlineCylinder",
     "OutlineSphere",
@@ -21,7 +20,6 @@ __all__ = [
     "Scene",
     "Sphere",
     "TransformedOutlineCone",
-    "TransformedShape",
     "Triangle",
     "Function",
     "Direction",

@@ -1,11 +1,12 @@
+import typing as ty
+
 import numba as nb
 import numpy as np
 
 from .. import logic, utility
-from .shape import Shape
 
 
-class Triangle(Shape):
+class Triangle(logic.Shape):
     def __init__(self, v1=None, v2=None, v3=None):
         super().__init__()
         self.v1 = np.zeros(3) if v1 is None else v1
@@ -40,8 +41,13 @@ class Triangle(Shape):
             return logic.NoHit
 
     @staticmethod
-    @nb.njit(cache=True)
-    def _intersect(v1, v2, v3, ray_origin, ray_direction) -> (bool, float):
+    @nb.njit(
+        "Tuple((boolean, float64))(float64[:], float64[:], float64[:], float64[:], float64[:])",
+        cache=True,
+    )
+    def _intersect(
+        v1, v2, v3, ray_origin, ray_direction
+    ) -> ty.Tuple[bool, float]:
         e1 = v2 - v1
         e2 = v3 - v1
         px = ray_direction[1] * e2[2] - ray_direction[2] * e2[1]

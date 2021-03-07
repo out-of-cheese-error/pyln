@@ -13,24 +13,22 @@ except PackageNotFoundError:  # pragma: no cover
     __version__ = "unknown"
 
 from . import logic, utility
-from .logic import Box, Hit, Paths, Shape
+from .logic import BooleanShape, Box, Hit, Op, Paths, Shape, TransformedShape
 from .shapes import (
-    BooleanShape,
     Cone,
     Cube,
     Cylinder,
     Direction,
     Function,
     Mesh,
-    Op,
     OutlineCone,
     OutlineCylinder,
     OutlineSphere,
     Plane,
     Scene,
     Sphere,
+    StripedCube,
     TransformedOutlineCone,
-    TransformedShape,
     Triangle,
 )
 
@@ -44,6 +42,7 @@ __all__ = [
     "BooleanShape",
     "Cone",
     "Cube",
+    "StripedCube",
     "Cylinder",
     "Mesh",
     "Op",

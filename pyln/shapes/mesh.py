@@ -8,11 +8,10 @@ import numpy as np
 
 from .. import __version__, logic, utility
 from .cube import Cube
-from .shape import Shape
 from .triangle import Triangle
 
 
-class Mesh(Shape):
+class Mesh(logic.Shape):
     def __init__(self, triangles: ty.List[Triangle]):
         super().__init__()
         self.triangles: ty.List[Triangle] = triangles
@@ -47,9 +46,7 @@ class Mesh(Shape):
         self.box = logic.Box.BoxForShapes(self.triangles)
 
     def unit_cube(self):
-        self.fit_inside(
-            logic.Box(np.zeros(3), np.array([1, 1, 1])), np.zeros(3)
-        )
+        self.fit_inside(logic.Box(np.zeros(3), np.ones(3)), np.zeros(3))
         self.move_to(np.zeros(3), np.array([0.5, 0.5, 0.5]))
 
     def move_to(self, position: np.ndarray, anchor: np.ndarray):
@@ -59,10 +56,7 @@ class Mesh(Shape):
     def fit_inside(self, box: logic.Box, anchor: np.ndarray):
         scale = np.amin(box.size() / self.bounding_box().size())
         extra = box.size() - (self.bounding_box().size() * scale)
-        matrix = np.identity(4)
-        matrix = utility.matrix_mul_matrix(
-            utility.vector_translate(-self.bounding_box().min), matrix
-        )
+        matrix = utility.vector_translate(-self.bounding_box().min)
         matrix = utility.matrix_mul_matrix(
             utility.vector_scale([scale, scale, scale]), matrix
         )

@@ -7,24 +7,30 @@ EPS = 1e-9
 INF = 1e9
 
 
-@nb.njit(cache=True)
-def matrix_mul_ray(
-    matrix: np.ndarray, ray_origin: np.ndarray, ray_direction: np.ndarray
-) -> ty.Tuple[np.ndarray, np.ndarray]:
-    return (
-        matrix_mul_position_vector(matrix, ray_origin),
-        matrix_mul_direction_vector(matrix, ray_direction),
-    )
+@nb.njit("float64(float64[:])", cache=True)
+def vector_length(v: np.ndarray) -> float:
+    return np.sqrt(np.sum(v ** 2.0, axis=-1))
 
 
-@nb.njit(cache=True)
+@nb.njit("float64(float64[:])", cache=True)
+def vector_squared_length(v: np.ndarray) -> float:
+    return np.sum(v ** 2.0, axis=-1)
+
+
+@nb.njit("float64[:](float64[:])", cache=True)
+def vector_normalize(v: np.ndarray) -> np.ndarray:
+    length = vector_length(v)
+    return v / length
+
+
+@nb.njit("float64[:,:](float64[:])", cache=True)
 def vector_translate(vector: np.ndarray) -> np.ndarray:
     mat = np.identity(4)
     mat[3, 0:3] = vector[:3]
     return mat
 
 
-@nb.njit(cache=True)
+@nb.njit("float64[:,:](float64[:], float64)", cache=True)
 def vector_rotate(vector: np.ndarray, a: float) -> np.ndarray:
     vector = vector_normalize(vector)
     sin, cos = np.sin(a), np.cos(a)
@@ -58,58 +64,37 @@ def vector_scale(vector):
     return np.diagflat([vector[0], vector[1], vector[2], 1.0])
 
 
-@nb.njit(cache=True)
-def vector_length(v: np.ndarray) -> float:
-    return np.sqrt(np.sum(v ** 2.0, axis=-1))
-
-
-@nb.njit(cache=True)
-def vector_squared_length(v: np.ndarray) -> float:
-    return np.sum(v ** 2.0, axis=-1)
-
-
-@nb.njit(cache=True)
-def vector_normalize(v: np.ndarray) -> np.ndarray:
-    length = vector_length(v)
-    return v / length
-
-
-@nb.njit(cache=True)
+@nb.njit("float64[:](float64[:,:], float64[:])", cache=True)
 def matrix_mul_position_vector(
-    matrix: np.ndarray, vector: np.ndarray, normalize: bool = False
+    matrix: np.ndarray, vector: np.ndarray
 ) -> np.ndarray:
-    output = np.array(
-        [vector[0], vector[1], vector[2], 1.0], dtype=vector.dtype
-    )
+    output = np.array([vector[0], vector[1], vector[2], 1.0])
     output = np.dot(output, matrix)
-    if normalize:
-        output /= output[3]
+    output /= output[3]
     return output[:3]
 
 
-@nb.njit(cache=True)
+@nb.njit("float64[:](float64[:,:], float64[:])", cache=True)
 def matrix_mul_direction_vector(
     matrix: np.ndarray, vector: np.ndarray
 ) -> np.ndarray:
-    x = (
-        matrix[0, 0] * vector[0]
-        + matrix[0, 1] * vector[1]
-        + matrix[0, 2] * vector[2]
-    )
-    y = (
-        matrix[1, 0] * vector[0]
-        + matrix[1, 1] * vector[1]
-        + matrix[1, 2] * vector[2]
-    )
-    z = (
-        matrix[2, 0] * vector[0]
-        + matrix[2, 1] * vector[1]
-        + matrix[2, 2] * vector[2]
-    )
-    return vector_normalize(np.array([x, y, z]))
+    return vector_normalize(np.dot(vector, matrix[:3, :3]))
 
 
-@nb.njit(cache=True)
+@nb.njit(
+    "Tuple((float64[:], float64[:]))(float64[:,:], float64[:], float64[:])",
+    cache=True,
+)
+def matrix_mul_ray(
+    matrix: np.ndarray, ray_origin: np.ndarray, ray_direction: np.ndarray
+) -> ty.Tuple[np.ndarray, np.ndarray]:
+    return (
+        matrix_mul_position_vector(matrix, ray_origin),
+        matrix_mul_direction_vector(matrix, ray_direction),
+    )
+
+
+@nb.njit("float64[:,:](float64[:], float64[:], float64[:])", cache=True)
 def matrix_look_at(eye, target, up):
     # from Pyrr
     eye = np.asarray(eye)
@@ -131,15 +116,10 @@ def matrix_look_at(eye, target, up):
     )
 
 
-@nb.njit(cache=True)
-def matrix_perspective_projection(fovy, aspect, near, far):
-    # from Pyrr
-    ymax = near * np.tan(fovy * np.pi / 360.0)
-    xmax = ymax * aspect
-    return frustum(-xmax, xmax, -ymax, ymax, near, far)
-
-
-@nb.njit(cache=True)
+@nb.njit(
+    "float64[:,:](float64, float64, float64, float64, float64, float64)",
+    cache=True,
+)
 def frustum(left, right, bottom, top, near, far):
     # from Pyrr
     A = (right + left) / (right - left)
@@ -159,7 +139,18 @@ def frustum(left, right, bottom, top, near, far):
     )
 
 
-@nb.njit(cache=True)
+@nb.njit("float64[:,:](float64, float64, float64, float64)", cache=True)
+def matrix_perspective_projection(fovy, aspect, near, far):
+    # from Pyrr
+    ymax = near * np.tan(fovy * np.pi / 360.0)
+    xmax = ymax * aspect
+    return frustum(-xmax, xmax, -ymax, ymax, near, far)
+
+
+@nb.njit(
+    "Tuple((float64[:], float64[:]))(float64[:,:], float64[:], float64[:])",
+    cache=True,
+)
 def matrix_mul_box(
     matrix: np.ndarray, min_box: np.ndarray, max_box: np.ndarray
 ) -> ty.Tuple[np.ndarray, np.ndarray]:
@@ -183,17 +174,17 @@ def matrix_mul_box(
     return xa + ya + za + t, xb + yb + zb + t
 
 
-@nb.njit(cache=True)
+@nb.njit("float64[:,:](float64[:,:], float64[:,:])", cache=True)
 def matrix_mul_matrix(m1, m2):
     return np.dot(m2, m1)
 
 
-@nb.njit(cache=True)
+@nb.njit("float64[:,:](float64[:,:])", cache=True)
 def matrix_inverse(matrix: np.ndarray) -> np.ndarray:
     return np.linalg.inv(matrix)
 
 
-@nb.njit(cache=True)
+@nb.njit("float64(float64[:], float64[:], float64[:])", cache=True)
 def segment_distance(p: np.ndarray, v: np.ndarray, w: np.ndarray) -> float:
     l2 = vector_squared_length(v - w)
     if l2 == 0:
@@ -204,6 +195,15 @@ def segment_distance(p: np.ndarray, v: np.ndarray, w: np.ndarray) -> float:
     if t > 1:
         return vector_length(p - w)
     return vector_length((v + ((w - v) * t)) - p)
+
+
+@nb.njit("float64[:]()", cache=True)
+def random_unit_vector():
+    while True:
+        v = np.random.random(3) * 2 - 1
+        if vector_squared_length(v) > 1:
+            continue
+        return vector_normalize(v)
 
 
 def compile_numba():
@@ -221,3 +221,4 @@ def compile_numba():
     matrix_perspective_projection(50.0, 1.0, 0.1, 100.0)
     matrix_mul_ray(m, v - 0.5, v + 0.5)
     segment_distance(v, v + 5, v - 10)
+    random_unit_vector()

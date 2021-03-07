@@ -1,5 +1,7 @@
 import typing as ty
 
+from enum import Enum
+
 import numba as nb
 import numpy as np
 from PIL import Image, ImageDraw
@@ -59,7 +61,10 @@ class Box:
         return Box._intersect(self.min, self.max, ray_origin, ray_direction)
 
     @staticmethod
-    @nb.njit(cache=True)
+    @nb.njit(
+        "Tuple((float64, float64))(float64[:], float64[:], float64[:], float64[:])",
+        cache=True,
+    )
     def _intersect(
         min_box: np.ndarray,
         max_box: np.ndarray,
@@ -121,7 +126,7 @@ class ClipFilter(Filter):
         self.clip_box = Box([-1, -1, -1], [1, 1, 1])
 
     def filter(self, v: np.ndarray) -> ty.Tuple[np.ndarray, bool]:
-        w = utility.matrix_mul_position_vector(self.matrix, v, True)
+        w = utility.matrix_mul_position_vector(self.matrix, v)
         if not self.scene.visible(self.eye, v):
             return w, False
         if not self.clip_box.contains(w):
@@ -130,7 +135,7 @@ class ClipFilter(Filter):
 
 
 class Path:
-    def __init__(self, path=None):
+    def __init__(self, path: ty.Union[np.ndarray, ty.List[np.ndarray]] = None):
         self.path: ty.List[np.ndarray] = (
             [np.array(p) for p in path] if path is not None else []
         )
@@ -215,13 +220,24 @@ class Path:
 
 
 class Paths:
-    def __init__(self, paths=None):
+    def __init__(
+        self,
+        paths: ty.Union[
+            np.ndarray,
+            ty.List[
+                ty.Union[
+                    np.ndarray,
+                    Path,
+                    ty.List[np.ndarray],
+                    ty.List[ty.List[float]],
+                ]
+            ],
+        ] = None,
+    ):
         if paths is None or not len(paths):
             self.paths = []
-        elif type(paths[0]) == Path:
-            self.paths = paths
         else:
-            self.paths = [Path(p) for p in paths]
+            self.paths = [Path(p) if type(p) != Path else p for p in paths]
 
     def bounding_box(self) -> Box:
         box = self.paths[0].bounding_box()
@@ -266,9 +282,14 @@ class Paths:
     def write_to_png(self, file_path: str, width, height):
         self.to_image(width, height).save(file_path)
 
-    def to_svg(self, width, height) -> str:
+    def to_svg(self, width, height, background_color=None) -> str:
+        if background_color is None:
+            bg = ""
+        else:
+            bg = f' style="background-color:{background_color}"'
+
         lines = [
-            f'<svg width="{width}" height="{height}" '
+            f'<svg width="{width}" height="{height}"{bg} '
             f'version="1.1" baseProfile="full" '
             f'xmlns="http://www.w3.org/2000/svg">',
             f'<g transform="translate(0,{height}) scale(1,-1)">',
@@ -277,9 +298,9 @@ class Paths:
         lines.append("</g></svg>")
         return "\n".join(lines)
 
-    def write_to_svg(self, path: str, width, height):
+    def write_to_svg(self, path: str, width, height, background_color=None):
         with open(path, "w") as file:
-            file.write(self.to_svg(width, height))
+            file.write(self.to_svg(width, height, background_color))
 
     def write_to_txt(self, path: str):
         with open(path, "w") as file:
@@ -449,3 +470,141 @@ class Shape:
 
     def paths(self) -> Paths:
         pass
+
+    def __sub__(self, other):
+        return BooleanShape(Op.Difference, self, other)
+
+    def __mul__(self, other):
+        return BooleanShape(Op.Intersection, self, other)
+
+    def rotate(self, axis: ty.Union[ty.List[float], np.ndarray], theta: float):
+        if type(axis) == list:
+            axis = np.array(axis, dtype=np.float64)
+        return TransformedShape(
+            self, utility.vector_rotate(axis, np.deg2rad(theta))
+        )
+
+    def rotate_x(self, theta: float):
+        # TODO: document theta = degrees
+        return TransformedShape(
+            self,
+            utility.vector_rotate(
+                np.array([1, 0, 0], dtype=np.float64), np.deg2rad(theta)
+            ),
+        )
+
+    def rotate_y(self, theta: float):
+        return TransformedShape(
+            self,
+            utility.vector_rotate(
+                np.array([0, 1, 0], dtype=np.float64), np.deg2rad(theta)
+            ),
+        )
+
+    def rotate_z(self, theta: float):
+        return TransformedShape(
+            self,
+            utility.vector_rotate(
+                np.array([0, 0, 1], dtype=np.float64), np.deg2rad(theta)
+            ),
+        )
+
+    def scale(self, scale: np.ndarray):
+        if type(scale) == list:
+            scale = np.array(scale, dtype=np.float64)
+        return TransformedShape(self, utility.vector_scale(scale))
+
+    def translate(self, translate: np.ndarray):
+        if type(translate) == list:
+            translate = np.array(translate, dtype=np.float64)
+        return TransformedShape(self, utility.vector_translate(translate))
+
+
+class TransformedShape(Shape):
+    def __init__(self, shape: Shape, matrix: np.ndarray):
+        super().__init__()
+        self.shape = shape
+        self.matrix = matrix
+        self.inverse = utility.matrix_inverse(matrix)
+
+    def compile(self):
+        self.shape.compile()
+
+    def bounding_box(self) -> Box:
+        box = self.shape.bounding_box()
+        min_box, max_box = utility.matrix_mul_box(self.matrix, box.min, box.max)
+        return Box(min_box, max_box)
+
+    def contains(self, v: np.ndarray, f: float) -> bool:
+        return self.shape.contains(
+            utility.matrix_mul_position_vector(self.inverse, v), f
+        )
+
+    def intersect(
+        self, ray_origin: np.ndarray, ray_direction: np.ndarray
+    ) -> Hit:
+        origin, direction = utility.matrix_mul_ray(
+            self.inverse, ray_origin, ray_direction
+        )
+        return self.shape.intersect(origin, direction)
+
+    def paths(self) -> Paths:
+        return self.shape.paths().transform(self.matrix)
+
+
+class Op(Enum):
+    Intersection = 0
+    Difference = 1
+
+
+class BooleanShape(Shape, Filter):
+    @staticmethod
+    def from_shapes(op: Op, shapes: [Shape]) -> Shape:
+        if len(shapes) == 0:
+            return Shape()
+        shape = shapes[0]
+        for i in range(1, len(shapes)):
+            shape = BooleanShape(op, shape, shapes[i])
+        return shape
+
+    def __init__(self, op: Op, shape_a: Shape, shape_b: Shape):
+        super().__init__()
+        self.shape_a = shape_a
+        self.shape_b = shape_b
+        self.op = op
+
+    def compile(self):
+        pass
+
+    def bounding_box(self) -> Box:
+        return self.shape_a.bounding_box().extend(self.shape_b.bounding_box())
+
+    def contains(self, v: np.ndarray, f: float) -> bool:
+        f = 1e-3
+        if self.op == Op.Intersection:
+            return self.shape_a.contains(v, f) and self.shape_b.contains(v, f)
+        elif self.op == Op.Difference:
+            return self.shape_a.contains(v, f) and not self.shape_b.contains(
+                v, -f
+            )
+        return False
+
+    def intersect(
+        self, ray_origin: np.ndarray, ray_direction: np.ndarray
+    ) -> Hit:
+        hit_a = self.shape_a.intersect(ray_origin, ray_direction)
+        hit_b = self.shape_b.intersect(ray_origin, ray_direction)
+        hit = hit_a.min(hit_b)
+        v = ray_origin + (hit.t * ray_direction)
+        if (not hit.ok()) or self.contains(v, 0.0):
+            return hit
+        return self.intersect(
+            ray_origin + ((hit.t + 0.01) * ray_direction), ray_direction
+        )
+
+    def paths(self) -> Paths:
+        paths = Paths(self.shape_a.paths().paths + self.shape_b.paths().paths)
+        return paths.chop(0.01).filter(self)
+
+    def filter(self, v: np.ndarray) -> ty.Tuple[np.ndarray, bool]:
+        return v, self.contains(v, 0.0)

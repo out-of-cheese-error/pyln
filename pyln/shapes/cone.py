@@ -4,10 +4,9 @@ import numba as nb
 import numpy as np
 
 from .. import logic, utility
-from .shape import Shape, TransformedShape
 
 
-class Cone(Shape):
+class Cone(logic.Shape):
     def __init__(self, radius: float, height: float):
         super().__init__()
         self.radius = radius
@@ -37,7 +36,10 @@ class Cone(Shape):
             return logic.NoHit
 
     @staticmethod
-    @nb.njit(cache=True)
+    @nb.njit(
+        "Tuple((boolean, float64))(float64, float64, float64[:], float64[:])",
+        cache=True,
+    )
     def _intersect(
         radius: float,
         height: float,
@@ -118,7 +120,7 @@ class OutlineCone(Cone):
         return logic.Paths(paths)
 
 
-class TransformedOutlineCone(TransformedShape):
+class TransformedOutlineCone(logic.TransformedShape):
     def __init__(
         self,
         eye: np.ndarray,

@@ -1,9 +1,9 @@
 import numpy as np
 
-from .. import Shape, logic, utility
+from .. import logic, utility
 
 
-class Scene(Shape):
+class Scene(logic.Shape):
     def __init__(self):
         super().__init__()
         self.shapes = []
