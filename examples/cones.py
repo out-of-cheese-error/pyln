@@ -114,8 +114,8 @@ def main():
         scene.add(ConeTree(eye, up, v0, v1, z / 64))
     print("Made scene")
     # define rendering parameters
-    width = 500  # rendered width
-    height = 500  # rendered height
+    width = 2048  # rendered width
+    height = 2048  # rendered height
     fovy = 90.0  # vertical field of view, degrees
     znear = 0.1  # near z plane
     zfar = 100.0  # far z plane
