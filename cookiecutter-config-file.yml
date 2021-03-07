@@ -2,7 +2,7 @@
 
 default_context:
   project_name: "pyln"
-  project_description: "3D line art engine (based on ln)"
+  project_description: "3D line art engine (Python port of fogleman/ln)"
   organization: "out-of-cheese-error"
   license: "MIT"
   version: "0.1.0"

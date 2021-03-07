@@ -1,5 +1,5 @@
 # type: ignore[attr-defined]
-"""3D line art engine (based on ln)"""
+"""3D line art engine (Python port of fogleman/ln)"""
 
 try:
     from importlib.metadata import PackageNotFoundError, version
