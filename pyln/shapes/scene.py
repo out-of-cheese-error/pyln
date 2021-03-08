@@ -1,3 +1,5 @@
+import typing as ty
+
 import numpy as np
 
 from .. import utility
@@ -40,9 +42,9 @@ class Scene(Shape):
 
     def render(
         self,
-        eye: np.ndarray,
-        center: np.ndarray,
-        up: np.ndarray,
+        eye: ty.Union[ty.List[float], np.ndarray],
+        center: ty.Union[ty.List[float], np.ndarray],
+        up: ty.Union[ty.List[float], np.ndarray],
         width,
         height,
         fovy,
@@ -50,6 +52,9 @@ class Scene(Shape):
         far,
         step,
     ) -> Paths:
+        eye = np.asarray(eye, dtype=np.float64)
+        center = np.asarray(center, dtype=np.float64)
+        up = np.asarray(up, dtype=np.float64)
         aspect = width / height
         matrix = utility.matrix_look_at(eye, center, up)
         matrix = utility.matrix_mul_matrix(

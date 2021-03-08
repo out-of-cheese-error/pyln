@@ -5,17 +5,15 @@ import pyln
 def main():
     pyln.utility.compile_numba()
     # define camera parameters
-    eye = np.array([8, 8, 8], dtype=np.float64)  # camera position
-    center = np.array([0, 0, 0], dtype=np.float64)  # camera looks at
-    up = np.array([0, 0, 1], dtype=np.float64)  # up direction
+    eye = [8, 8, 8]  # camera position
+    center = [0, 0, 0]  # camera looks at
+    up = [0, 0, 1]  # up direction
     scene = pyln.Scene()
     n = 10
     for x in np.arange(-n, n):
         for y in np.arange(-n, n):
             scene.add(
-                pyln.OutlineSphere(
-                    eye, up, np.array([x, y, np.random.random()]), 0.45
-                )
+                pyln.OutlineSphere(eye, up, [x, y, np.random.random()], 0.45)
             )
 
     # define rendering parameters

@@ -13,9 +13,9 @@ def main():
             scene.add(pyln.Cube(vector - 0.5, vector + 0.5))
 
     # define camera parameters
-    eye = np.array([6, 5, 3], dtype=np.float64)  # camera position
-    center = np.array([0, 0, 0], dtype=np.float64)  # camera looks at
-    up = np.array([0, 0, 1], dtype=np.float64)  # up direction
+    eye = [6, 5, 3]  # camera position
+    center = [0, 0, 0]  # camera looks at
+    up = [0, 0, 1]  # up direction
 
     # define rendering parameters
     width = 1920  # rendered width

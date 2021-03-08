@@ -16,9 +16,13 @@ warnings.simplefilter("ignore", category=NumbaWarning)
 class Sphere(Shape):
     def __init__(self, center=None, radius=1.0, texture=1):
         super().__init__()
-        self.center = np.zeros(3) if center is None else center
+        self.center = (
+            np.zeros(3)
+            if center is None
+            else np.asarray(center, dtype=np.float64)
+        )
         self.radius = radius
-        radius_vec = np.array([radius, radius, radius])
+        radius_vec = np.array([radius, radius, radius], dtype=np.float64)
         self.box = Box(self.center - radius_vec, self.center + radius_vec)
         self.texture = texture
 
@@ -185,11 +189,15 @@ class Sphere(Shape):
 
 class OutlineSphere(Sphere):
     def __init__(
-        self, eye: np.ndarray, up: np.ndarray, center: np.ndarray, radius: float
+        self,
+        eye: ty.Union[ty.List[float], np.ndarray],
+        up: ty.Union[ty.List[float], np.ndarray],
+        center: ty.Union[ty.List[float], np.ndarray],
+        radius: float,
     ):
         super().__init__(center, radius)
-        self.eye = eye
-        self.up = up
+        self.eye = np.asarray(eye, dtype=np.float64)
+        self.up = np.asarray(up, dtype=np.float64)
 
     def paths(self) -> Paths:
         hyp = utility.vector_length(self.center - self.eye)

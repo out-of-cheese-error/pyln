@@ -1,4 +1,3 @@
-import numpy as np
 import pyln
 
 
@@ -19,9 +18,9 @@ def main():
         scene.add(shape.rotate_z(i))
 
         # define camera parameters
-        eye = np.array([0, 6, 2], dtype=np.float64)  # camera position
-        center = np.array([0, 0, 0], dtype=np.float64)  # camera looks at
-        up = np.array([0, 0, 1], dtype=np.float64)  # up direction
+        eye = [0, 6, 2]  # camera position
+        center = [0, 0, 0]  # camera looks at
+        up = [0, 0, 1]  # up direction
 
         # define rendering parameters
         width = 750  # rendered width

@@ -1,4 +1,3 @@
-import numpy as np
 import pyln
 
 
@@ -9,9 +8,9 @@ def main():
     scene.add(pyln.Cube([-1, -1, -1], [1, 1, 1]))
 
     # define camera parameters
-    eye = np.array([4, 3, 2], dtype=np.float64)  # camera position
-    center = np.array([0, 0, 0], dtype=np.float64)  # camera looks at
-    up = np.array([0, 0, 1], dtype=np.float64)  # up direction
+    eye = [4, 3, 2]  # camera position
+    center = [0, 0, 0]  # camera looks at
+    up = [0, 0, 1]  # up direction
 
     # define rendering parameters
     width = 1024  # rendered width

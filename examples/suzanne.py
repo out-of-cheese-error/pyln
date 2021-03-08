@@ -1,4 +1,3 @@
-import numpy as np
 import pyln
 
 
@@ -11,9 +10,9 @@ def main():
     scene.add(mesh.rotate_y(30))
 
     # define camera parameters
-    eye = np.array([-0.5, 0.5, 2], dtype=np.float64)  # camera position
-    center = np.array([0, 0, 0], dtype=np.float64)  # camera looks at
-    up = np.array([0, 1, 0], dtype=np.float64)  # up direction
+    eye = [-0.5, 0.5, 2]  # camera position
+    center = [0, 0, 0]  # camera looks at
+    up = [0, 1, 0]  # up direction
 
     # define rendering parameters
     width = 1024  # rendered width

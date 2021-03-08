@@ -1,4 +1,3 @@
-import numpy as np
 import pyln
 
 
@@ -8,17 +7,15 @@ def main():
     scene = pyln.Scene()
     mesh = pyln.Mesh.from_stl("examples/suzanne.stl")
 
-    mesh.fit_inside(
-        pyln.Box([-1, -1, -1], [1, 1, 1]), np.array([0.5, 0.5, 0.5])
-    )
+    mesh.fit_inside(pyln.Box([-1, -1, -1], [1, 1, 1]), [0.5, 0.5, 0.5])
     cubes = mesh.voxelize(1.0 / 64)
     for cube in cubes:
         scene.add(cube)
 
     # define camera parameters
-    eye = np.array([-1, -2, 0], dtype=np.float64)  # camera position
-    center = np.array([0, 0, 0], dtype=np.float64)  # camera looks at
-    up = np.array([0, 0, 1], dtype=np.float64)  # up direction
+    eye = [-1, -2, 0]  # camera position
+    center = [0, 0, 0]  # camera looks at
+    up = [0, 0, 1]  # up direction
 
     # define rendering parameters
     width = 1024 / 2  # rendered width

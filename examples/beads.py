@@ -31,9 +31,9 @@ def low_pass_noise(num: int, alpha: float, iterations: int):
 def main():
     pyln.utility.compile_numba()
     # define camera parameters
-    eye = np.array([8.0, 8.0, 8.0])  # camera position
-    center = np.array([0.0, 0.0, 0.0])  # camera looks at
-    up = np.array([0.0, 0.0, 1.0])  # up direction
+    eye = [8, 8, 8]  # camera position
+    center = [0, 0, 0]  # camera looks at
+    up = [0, 0, 1]  # up direction
 
     scene = pyln.Scene()
     position = np.zeros(3)
