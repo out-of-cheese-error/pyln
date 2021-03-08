@@ -32,8 +32,11 @@ class Shape:
     def __sub__(self, other):
         return BooleanShape(Op.Difference, self, other)
 
-    def __mul__(self, other):
+    def __and__(self, other):
         return BooleanShape(Op.Intersection, self, other)
+
+    def __or__(self, other):
+        return BooleanShape(Op.Union, self, other)
 
     def rotate(
         self,
@@ -43,8 +46,7 @@ class Shape:
     ):
         if not radians:
             theta = np.deg2rad(theta)
-        if type(axis) == list:
-            axis = np.array(axis, dtype=np.float64)
+        axis = np.asarray(axis, dtype=np.float64)
         return TransformedShape(self, utility.vector_rotate(axis, theta))
 
     def rotate_x(self, theta: float, radians=False):
@@ -72,13 +74,11 @@ class Shape:
         )
 
     def scale(self, scale: np.ndarray):
-        if type(scale) == list:
-            scale = np.array(scale, dtype=np.float64)
+        scale = np.asarray(scale, dtype=np.float64)
         return TransformedShape(self, utility.vector_scale(scale))
 
     def translate(self, translate: np.ndarray):
-        if type(translate) == list:
-            translate = np.array(translate, dtype=np.float64)
+        translate = np.asarray(translate, dtype=np.float64)
         return TransformedShape(self, utility.vector_translate(translate))
 
 
@@ -117,6 +117,7 @@ class TransformedShape(Shape):
 class Op(Enum):
     Intersection = 0
     Difference = 1
+    Union = 2
 
 
 class BooleanShape(Shape, Filter):
@@ -147,8 +148,10 @@ class BooleanShape(Shape, Filter):
             return self.shape_a.contains(v, f) and self.shape_b.contains(v, f)
         elif self.op == Op.Difference:
             return self.shape_a.contains(v, f) and not self.shape_b.contains(
-                v, -f
+                v, f
             )
+        elif self.op == Op.Union:
+            return self.shape_a.contains(v, f) or self.shape_b.contains(v, f)
         return False
 
     def intersect(
