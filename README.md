@@ -18,7 +18,7 @@ Constructive Solid Geometry (CSG) is quite intuitive:
 import pyln
 
 sphere = pyln.Sphere()
-cube = pyln.Cube([-0.8, -0.8, -0.8], [0.8, 0.8, 0.8], 20)
+cube = pyln.Cube([-0.8, -0.8, -0.8], [0.8, 0.8, 0.8])
 cylinder = pyln.Cylinder(0.4, -2.0, 2.0)
 shape = (
     (sphere * cube)
