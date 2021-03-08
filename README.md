@@ -21,7 +21,7 @@ sphere = pyln.Sphere()
 cube = pyln.Cube([-0.8, -0.8, -0.8], [0.8, 0.8, 0.8])
 cylinder = pyln.Cylinder(0.4, -2.0, 2.0)
 shape = (
-    (sphere * cube)
+    (sphere & cube)
     - cylinder
     - cylinder.rotate_x(90)
     - cylinder.rotate_y(90)
