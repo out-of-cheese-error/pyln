@@ -160,23 +160,23 @@ def matrix_mul_box(
     matrix: np.ndarray, min_box: np.ndarray, max_box: np.ndarray
 ) -> ty.Tuple[np.ndarray, np.ndarray]:
     # http://dev.theomader.com/transform-bounding-boxes/
-    r = matrix[:3, 0]
-    u = matrix[:3, 1]
-    b = matrix[:3, 2]
-    t = matrix[:3, 3]
-    xa, xb = (
-        np.minimum(r * min_box[0], r * max_box[0]),
-        np.maximum(r * min_box[0], r * max_box[0]),
+    right = matrix[0, :3]
+    up = matrix[1, :3]
+    backward = matrix[2, :3]
+    translation = matrix[3, :3]
+    xa, xb = (right * min_box[0], right * max_box[0])
+    ya, yb = (up * min_box[1], up * max_box[1])
+    za, zb = (backward * min_box[2], backward * max_box[2])
+    return (
+        np.minimum(xa, xb)
+        + np.minimum(ya, yb)
+        + np.minimum(za, zb)
+        + translation,
+        np.maximum(xa, xb)
+        + np.maximum(ya, yb)
+        + np.maximum(za, zb)
+        + translation,
     )
-    ya, yb = (
-        np.minimum(u * min_box[1], u * max_box[1]),
-        np.maximum(u * min_box[1], u * max_box[1]),
-    )
-    za, zb = (
-        np.minimum(b * min_box[2], b * max_box[2]),
-        np.maximum(b * min_box[2], b * max_box[2]),
-    )
-    return xa + ya + za + t, xb + yb + zb + t
 
 
 @nb.njit("float64[:,:](float64[:,:], float64[:,:])", cache=True)
