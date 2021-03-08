@@ -1,4 +1,3 @@
-import numpy as np
 import pyln
 from pyln.utility import Transform
 

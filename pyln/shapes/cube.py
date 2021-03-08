@@ -6,7 +6,8 @@ import numba as nb
 import numpy as np
 from numba.core.errors import NumbaWarning
 
-from ..paths import Box, Hit, NoHit, Paths
+from .. import utility
+from ..paths import Box, Paths
 from ..shape import Shape
 
 warnings.simplefilter("ignore", category=NumbaWarning)
@@ -33,18 +34,12 @@ class Cube(Shape):
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> Hit:
-        ok, root = Cube._intersect(
-            self.min, self.max, ray_origin, ray_direction
-        )
-        if ok:
-            return Hit(self, root)
-        else:
-            return NoHit
+    ) -> float:
+        return Cube._intersect(self.min, self.max, ray_origin, ray_direction)
 
     @staticmethod
     @nb.njit(
-        "Tuple((boolean, float64))(float64[:], float64[:], float64[:], float64[:])",
+        "float64(float64[:], float64[:], float64[:], float64[:])",
         cache=True,
     )
     def _intersect(
@@ -52,16 +47,16 @@ class Cube(Shape):
         max_box: np.ndarray,
         ray_origin: np.ndarray,
         ray_direction: np.ndarray,
-    ) -> ty.Tuple[bool, float]:
+    ) -> float:
         n = (min_box - ray_origin) / ray_direction
         f = (max_box - ray_origin) / ray_direction
         n, f = np.minimum(n, f), np.maximum(n, f)
         t0, t1 = np.amax(n), np.amin(f)
         if t0 < 1e-3 < t1:
-            return True, t1
+            return t1
         if 1e-3 <= t0 < t1:
-            return True, t0
-        return False, 0
+            return t0
+        return utility.INF
 
     def paths(self) -> Paths:
         x1, y1, z1 = self.min[0], self.min[1], self.min[2]

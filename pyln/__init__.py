@@ -13,7 +13,7 @@ except PackageNotFoundError:  # pragma: no cover
     __version__ = "unknown"
 
 from . import paths, utility
-from .paths import Box, ClipFilter, Filter, Hit, Path, Paths
+from .paths import Box, ClipFilter, Filter, Path, Paths
 from .shape import BooleanShape, Op, Shape, TransformedShape
 from .shapes import (
     Cone,
@@ -41,7 +41,6 @@ __all__ = [
     "Path",
     "Paths",
     "Box",
-    "Hit",
     "Filter",
     "ClipFilter",
     "Shape",

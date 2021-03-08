@@ -1,7 +1,7 @@
 import numpy as np
 
 from .. import utility
-from ..paths import ClipFilter, Hit, Paths
+from ..paths import ClipFilter, Paths
 from ..shape import Shape
 from ..tree import Tree
 
@@ -24,13 +24,13 @@ class Scene(Shape):
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> Hit:
+    ) -> float:
         return self.tree.intersect(ray_origin, ray_direction)
 
     def visible(self, eye: np.ndarray, point: np.ndarray) -> bool:
         v = eye - point
         hit = self.intersect(point, utility.vector_normalize(v))
-        return hit.t >= utility.vector_length(v)
+        return hit >= utility.vector_length(v)
 
     def paths(self) -> Paths:
         result = []

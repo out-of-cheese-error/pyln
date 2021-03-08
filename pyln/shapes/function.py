@@ -4,7 +4,8 @@ from enum import Enum
 
 import numpy as np
 
-from ..paths import Box, Hit, NoHit, Paths
+from .. import utility
+from ..paths import Box, Paths
 from ..shape import Shape
 
 
@@ -36,14 +37,14 @@ class Function(Shape):
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> Hit:
+    ) -> float:
         step = 1 / 64
         sign = self.contains(ray_origin + (step * ray_direction), 0)
         for t in np.arange(step, 10, step):
             v = ray_origin + (t * ray_direction)
             if self.contains(v, 0) != sign and self.box.contains(v):
-                return Hit(self, t)
-        return NoHit
+                return t
+        return utility.INF
 
     def paths(self) -> Paths:
         fine = 1 / 256

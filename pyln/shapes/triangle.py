@@ -7,18 +7,29 @@ import numpy as np
 from numba.core.errors import NumbaWarning
 
 from .. import utility
-from ..paths import Box, Hit, NoHit, Paths
+from ..paths import Box, Paths
 from ..shape import Shape
 
 warnings.simplefilter("ignore", category=NumbaWarning)
 
 
 class Triangle(Shape):
-    def __init__(self, v1=None, v2=None, v3=None):
+    def __init__(
+        self,
+        v1: ty.Optional[ty.Union[ty.List[float], np.ndarray]] = None,
+        v2: ty.Optional[ty.Union[ty.List[float], np.ndarray]] = None,
+        v3: ty.Optional[ty.Union[ty.List[float], np.ndarray]] = None,
+    ):
         super().__init__()
-        self.v1 = np.zeros(3) if v1 is None else v1
-        self.v2 = np.zeros(3) if v2 is None else v2
-        self.v3 = np.zeros(3) if v3 is None else v3
+        self.v1: np.ndarray = (
+            np.zeros(3) if v1 is None else np.asarray(v1, dtype=np.float64)
+        )
+        self.v2: np.ndarray = (
+            np.zeros(3) if v2 is None else np.asarray(v2, dtype=np.float64)
+        )
+        self.v3: np.ndarray = (
+            np.zeros(3) if v3 is None else np.asarray(v3, dtype=np.float64)
+        )
         self.box = None
         self.update_bounding_box()
 
@@ -38,23 +49,23 @@ class Triangle(Shape):
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> Hit:
-        ok, root = Triangle._intersect(
+    ) -> float:
+        return Triangle._intersect(
             self.v1, self.v2, self.v3, ray_origin, ray_direction
         )
-        if ok:
-            return Hit(self, root)
-        else:
-            return NoHit
 
     @staticmethod
     @nb.njit(
-        "Tuple((boolean, float64))(float64[:], float64[:], float64[:], float64[:], float64[:])",
+        "float64(float64[:], float64[:], float64[:], float64[:], float64[:])",
         cache=True,
     )
     def _intersect(
-        v1, v2, v3, ray_origin, ray_direction
-    ) -> ty.Tuple[bool, float]:
+        v1: np.ndarray,
+        v2: np.ndarray,
+        v3: np.ndarray,
+        ray_origin: np.ndarray,
+        ray_direction: np.ndarray,
+    ) -> float:
         e1 = v2 - v1
         e2 = v3 - v1
         px = ray_direction[1] * e2[2] - ray_direction[2] * e2[1]
@@ -63,14 +74,14 @@ class Triangle(Shape):
         det = e1[0] * px + e1[1] * py + e1[2] * pz
 
         if -utility.EPS < det < utility.EPS:
-            return False, 0
+            return utility.INF
 
         inv = 1 / det
         t = ray_origin - v1
         u = (t[0] * px + t[1] * py + t[2] * pz) * inv
 
         if u < 0.0 or u > 1.0:
-            return False, 0
+            return utility.INF
 
         qx = t[1] * e1[2] - t[2] * e1[1]
         qy = t[2] * e1[0] - t[0] * e1[2]
@@ -82,12 +93,12 @@ class Triangle(Shape):
         ) * inv
 
         if v < 0.0 or (u + v) > 1.0:
-            return False, 0
+            return utility.INF
 
         d = (e2[0] * qx + e2[1] * qy + e2[2] * qz) * inv
         if d < utility.EPS:
-            return False, 0
-        return True, d
+            return utility.INF
+        return d
 
     def paths(self) -> Paths:
         return Paths(

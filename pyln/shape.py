@@ -5,7 +5,7 @@ from enum import Enum
 import numpy as np
 
 from . import utility
-from .paths import Box, Filter, Hit, Paths
+from .paths import Box, Filter, Paths
 
 
 class Shape:
@@ -23,7 +23,7 @@ class Shape:
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> Hit:
+    ) -> float:
         pass
 
     def paths(self) -> Paths:
@@ -104,7 +104,7 @@ class TransformedShape(Shape):
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> Hit:
+    ) -> float:
         origin, direction = utility.matrix_mul_ray(
             self.inverse, ray_origin, ray_direction
         )
@@ -153,15 +153,18 @@ class BooleanShape(Shape, Filter):
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> Hit:
+    ) -> float:
         hit_a = self.shape_a.intersect(ray_origin, ray_direction)
         hit_b = self.shape_b.intersect(ray_origin, ray_direction)
-        hit = hit_a.min(hit_b)
-        v = ray_origin + (hit.t * ray_direction)
-        if (not hit.ok()) or self.contains(v, 0.0):
+        if hit_a <= hit_b:
+            hit = hit_a
+        else:
+            hit = hit_b
+        v = ray_origin + (hit * ray_direction)
+        if not hit < utility.INF or self.contains(v, 0.0):
             return hit
         return self.intersect(
-            ray_origin + ((hit.t + 0.01) * ray_direction), ray_direction
+            ray_origin + ((hit + 0.01) * ray_direction), ray_direction
         )
 
     def paths(self) -> Paths:

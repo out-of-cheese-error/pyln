@@ -7,7 +7,7 @@ import numpy as np
 from numba.core.errors import NumbaWarning
 
 from .. import utility
-from ..paths import Box, Hit, NoHit, Paths
+from ..paths import Box, Paths
 from ..shape import Shape, TransformedShape
 
 warnings.simplefilter("ignore", category=NumbaWarning)
@@ -33,18 +33,14 @@ class Cone(Shape):
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> Hit:
-        ok, root = Cone._intersect(
+    ) -> float:
+        return Cone._intersect(
             self.radius, self.height, ray_origin, ray_direction
         )
-        if ok:
-            return Hit(self, root)
-        else:
-            return NoHit
 
     @staticmethod
     @nb.njit(
-        "Tuple((boolean, float64))(float64, float64, float64[:], float64[:])",
+        "float64(float64, float64, float64[:], float64[:])",
         cache=True,
     )
     def _intersect(
@@ -52,7 +48,7 @@ class Cone(Shape):
         height: float,
         ray_origin: np.ndarray,
         ray_direction: np.ndarray,
-    ) -> ty.Tuple[bool, float]:
+    ) -> float:
         k = radius / height
         k *= k
         a = (
@@ -72,7 +68,7 @@ class Cone(Shape):
         )
         slope = b * b - 4 * a * c
         if slope <= 0:
-            return False, 0
+            return utility.INF
         slope = np.sqrt(slope)
         t0 = (-b + slope) / 2 * a
         t1 = (-b - slope) / 2 * a
@@ -82,8 +78,8 @@ class Cone(Shape):
             if root > 1e-6:
                 p = ray_origin + (root * ray_direction)
                 if 0 < p[2] < height:
-                    return True, root
-        return False, 0
+                    return root
+        return utility.INF
 
     def paths(self) -> Paths:
         result = []

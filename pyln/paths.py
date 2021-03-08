@@ -21,7 +21,7 @@ class Box:
         self.box = np.array([min_box, max_box], dtype=np.float64)
 
     @classmethod
-    def BoxForShapes(cls, shapes: ty.List["Shape"]) -> "Box":
+    def BoxForShapes(cls, shapes) -> "Box":
         assert len(shapes)
         box = shapes[0].bounding_box()
         for shape in shapes:
@@ -88,28 +88,6 @@ class Box:
 
     def __repr__(self):
         return f"Box: {self.min} {self.max}"
-
-
-class Hit:
-    def __init__(self, shape, t: float):
-        self.shape = shape
-        self.t = t
-
-    def ok(self) -> bool:
-        return self.t < utility.INF
-
-    def min(self, other):
-        if self.t <= other.t:
-            return self
-        return other
-
-    def max(self, other):
-        if self.t > other.t:
-            return self
-        return other
-
-
-NoHit = Hit(None, utility.INF)
 
 
 class Filter:

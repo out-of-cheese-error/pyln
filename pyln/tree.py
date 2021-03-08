@@ -2,7 +2,8 @@ import typing as ty
 
 import numpy as np
 
-from .paths import Box, Hit, NoHit
+from . import utility
+from .paths import Box
 from .shape import Shape
 
 
@@ -16,7 +17,7 @@ class Node:
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray, tmin, tmax
-    ) -> Hit:
+    ) -> float:
         if self.axis is None:
             return self.intersect_shapes(ray_origin, ray_direction)
         tsplit = (self.point - ray_origin[self.axis]) / ray_direction[self.axis]
@@ -36,23 +37,23 @@ class Node:
             return second.intersect(ray_origin, ray_direction, tmin, tmax)
         else:
             h1 = first.intersect(ray_origin, ray_direction, tmin, tsplit)
-            if h1.t <= tsplit:
+            if h1 <= tsplit:
                 return h1
             h2 = second.intersect(
-                ray_origin, ray_direction, tsplit, min(tmax, h1.t)
+                ray_origin, ray_direction, tsplit, min(tmax, h1)
             )
-            if h1.t <= h2.t:
+            if h1 <= h2:
                 return h1
             else:
                 return h2
 
     def intersect_shapes(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> Hit:
-        hit = NoHit
+    ) -> float:
+        hit = utility.INF
         for shape in self.shapes:
             h = shape.intersect(ray_origin, ray_direction)
-            if h.t < hit.t:
+            if h < hit:
                 hit = h
         return hit
 
@@ -142,7 +143,7 @@ class Tree:
     def intersect(self, ray_origin: np.ndarray, ray_direction: np.ndarray):
         tmin, tmax = self.box.intersect(ray_origin, ray_direction)
         if tmax < tmin or tmax <= 0:
-            return NoHit
+            return utility.INF
         return self.root.intersect(ray_origin, ray_direction, tmin, tmax)
 
     def show_tree(self, level=0):

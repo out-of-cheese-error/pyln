@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 
 from .. import __version__, utility
-from ..paths import Box, Hit, Paths
+from ..paths import Box, Paths
 from ..shape import Shape
 from ..tree import Tree
 from .cube import Cube
@@ -36,7 +36,7 @@ class Mesh(Shape):
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> Hit:
+    ) -> float:
         return self.tree.intersect(ray_origin, ray_direction)
 
     def paths(self) -> Paths:

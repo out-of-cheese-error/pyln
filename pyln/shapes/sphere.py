@@ -7,7 +7,7 @@ import numpy as np
 from numba.core.errors import NumbaWarning
 
 from .. import utility
-from ..paths import Box, Hit, NoHit, Path, Paths
+from ..paths import Box, Path, Paths
 from ..shape import Shape
 
 warnings.simplefilter("ignore", category=NumbaWarning)
@@ -33,18 +33,14 @@ class Sphere(Shape):
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> Hit:
-        ok, root = Sphere._intersect(
+    ) -> float:
+        return Sphere._intersect(
             self.radius, self.center, ray_origin, ray_direction
         )
-        if ok:
-            return Hit(self, root)
-        else:
-            return NoHit
 
     @staticmethod
     @nb.njit(
-        "Tuple((boolean, float64))(float64, float64[:], float64[:], float64[:])",
+        "float64(float64, float64[:], float64[:], float64[:])",
         cache=True,
     )
     def _intersect(
@@ -52,7 +48,7 @@ class Sphere(Shape):
         center: np.ndarray,
         ray_origin: np.ndarray,
         ray_direction: np.ndarray,
-    ) -> ty.Tuple[bool, float]:
+    ) -> float:
         to = ray_origin - center
         b = np.dot(to, ray_direction)
         c = np.dot(to, to) - radius * radius
@@ -62,13 +58,13 @@ class Sphere(Shape):
             d = np.sqrt(d)
             t1 = -b - d
             if t1 > 1e-2:
-                return True, t1
+                return t1
 
             t2 = -b + d
             if t2 > 1e-2:
-                return True, t2
+                return t2
 
-        return False, 0
+        return utility.INF
 
     def paths(self) -> Paths:
         if self.texture == 1:
