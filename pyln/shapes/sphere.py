@@ -1,11 +1,16 @@
 import typing as ty
 
+import warnings
+
 import numba as nb
 import numpy as np
+from numba.core.errors import NumbaWarning
 
 from .. import utility
 from ..paths import Box, Hit, NoHit, Path, Paths
 from ..shape import Shape
+
+warnings.simplefilter("ignore", category=NumbaWarning)
 
 
 class Sphere(Shape):

@@ -1,10 +1,15 @@
 import typing as ty
 
+import warnings
+
 import numba as nb
 import numpy as np
+from numba.core.errors import NumbaWarning
 
 from ..paths import Box, Hit, NoHit, Paths
 from ..shape import Shape
+
+warnings.simplefilter("ignore", category=NumbaWarning)
 
 
 class Cube(Shape):

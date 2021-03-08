@@ -1,10 +1,15 @@
 import typing as ty
 
+import warnings
+
 import numba as nb
 import numpy as np
+from numba.core.errors import NumbaWarning
 from PIL import Image, ImageDraw
 
 from . import utility
+
+warnings.simplefilter("ignore", category=NumbaWarning)
 
 
 class Box:

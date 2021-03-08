@@ -1,10 +1,13 @@
 import typing as ty
 
+import warnings
 from enum import Enum
 
 import numba as nb
 import numpy as np
+from numba.core.errors import NumbaWarning
 
+warnings.simplefilter("ignore", category=NumbaWarning)
 EPS = 1e-9
 INF = 1e9
 
