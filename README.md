@@ -29,18 +29,22 @@ shape = (
 ```
 
 [Rotate and render as a GIF](examples/csg.py):
+
 ![csg](examples/images/csg.gif)
 
 ### Examples
 Images rendered from the scripts in the [examples folder](examples):
 
 #### [Cube](examples/cube.py)
+
 ![cube](examples/images/cube.svg)
 
 #### [Cubes](examples/cubes.py)
+
 ![cubes](examples/images/cubes.svg)
 
 #### [Function](examples/function.py)
+
 ![function](examples/images/function.svg)
 
 [comment]: <> (#### [Beads]&#40;examples/beads.py&#41;)
@@ -48,6 +52,7 @@ Images rendered from the scripts in the [examples folder](examples):
 [comment]: <> (![beads]&#40;examples/images/beads.svg&#41;)
 
 #### [Outline](examples/outline.py)
+
 ![outline](examples/images/outline.svg)
 
 [comment]: <> (#### [Cones]&#40;examples/cones.py&#41;)
@@ -55,18 +60,23 @@ Images rendered from the scripts in the [examples folder](examples):
 [comment]: <> (![cones]&#40;examples/images/cones.svg&#41;)
 
 #### [Skyscrapers](examples/skyscrapers.py)
+
 ![skyscrapers](examples/images/skyscrapers.svg)
 
 #### [Striped Skyscrapers](examples/skyscrapers_striped.py)
+
 ![skyscrapers_striped](examples/images/skyscrapers_striped.svg)
 
 #### [Suzanne (from .obj file)](examples/suzanne.py)
+
 ![suzanne](examples/images/suzanne.svg)
 
 #### [Suzanne (voxelized, from .stl file)](examples/voxelize.py)
+
 ![voxelize](examples/images/voxelize.svg)
 
 #### [Suzanne (sliced)](examples/slicer.py)
+
 ![sliced](examples/images/slicer.gif)
 
 ## Credits
