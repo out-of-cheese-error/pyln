@@ -12,8 +12,9 @@ try:
 except PackageNotFoundError:  # pragma: no cover
     __version__ = "unknown"
 
-from . import logic, utility
-from .logic import BooleanShape, Box, Hit, Op, Paths, Shape, TransformedShape
+from . import paths, utility
+from .paths import Box, ClipFilter, Filter, Hit, Path, Paths
+from .shape import BooleanShape, Op, Shape, TransformedShape
 from .shapes import (
     Cone,
     Cube,
@@ -31,15 +32,23 @@ from .shapes import (
     TransformedOutlineCone,
     Triangle,
 )
+from .tree import Node, Tree
 
 __all__ = [
-    "logic",
+    "paths",
+    "shape",
     "utility",
-    "Shape",
+    "Path",
     "Paths",
     "Box",
     "Hit",
+    "Filter",
+    "ClipFilter",
+    "Shape",
     "BooleanShape",
+    "TransformedShape",
+    "Tree",
+    "Node",
     "Cone",
     "Cube",
     "StripedCube",
@@ -53,7 +62,6 @@ __all__ = [
     "Scene",
     "Sphere",
     "TransformedOutlineCone",
-    "TransformedShape",
     "Triangle",
     "Function",
     "Direction",

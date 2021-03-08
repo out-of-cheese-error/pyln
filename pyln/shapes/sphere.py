@@ -3,22 +3,24 @@ import typing as ty
 import numba as nb
 import numpy as np
 
-from .. import logic, utility
+from .. import utility
+from ..paths import Box, Hit, NoHit, Path, Paths
+from ..shape import Shape
 
 
-class Sphere(logic.Shape):
+class Sphere(Shape):
     def __init__(self, center=None, radius=1.0, texture=1):
         super().__init__()
         self.center = np.zeros(3) if center is None else center
         self.radius = radius
         radius_vec = np.array([radius, radius, radius])
-        self.box = logic.Box(self.center - radius_vec, self.center + radius_vec)
+        self.box = Box(self.center - radius_vec, self.center + radius_vec)
         self.texture = texture
 
     def compile(self):
         pass
 
-    def bounding_box(self) -> logic.Box:
+    def bounding_box(self) -> Box:
         return self.box
 
     def contains(self, v: np.ndarray, f) -> bool:
@@ -26,14 +28,14 @@ class Sphere(logic.Shape):
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> logic.Hit:
+    ) -> Hit:
         ok, root = Sphere._intersect(
             self.radius, self.center, ray_origin, ray_direction
         )
         if ok:
-            return logic.Hit(self, root)
+            return Hit(self, root)
         else:
-            return logic.NoHit
+            return NoHit
 
     @staticmethod
     @nb.njit(
@@ -63,15 +65,15 @@ class Sphere(logic.Shape):
 
         return False, 0
 
-    def paths(self) -> logic.Paths:
+    def paths(self) -> Paths:
         if self.texture == 1:
-            return logic.Paths(Sphere.paths_1(self.radius, self.center))
+            return Paths(Sphere.paths_1(self.radius, self.center))
         elif self.texture == 2:
-            return logic.Paths(Sphere.paths_2(self.radius, self.center))
+            return Paths(Sphere.paths_2(self.radius, self.center))
         elif self.texture == 3:
-            return logic.Paths(Sphere.paths_3(self.radius, self.center))
+            return Paths(Sphere.paths_3(self.radius, self.center))
         elif self.texture == 4:
-            return logic.Paths(Sphere.paths_4(self.radius, self.center))
+            return Paths(Sphere.paths_4(self.radius, self.center))
 
     @staticmethod
     def paths_1(
@@ -98,24 +100,24 @@ class Sphere(logic.Shape):
         return paths
 
     @staticmethod
-    def paths_2(radius: float, center: np.ndarray) -> ty.List[logic.Path]:
+    def paths_2(radius: float, center: np.ndarray) -> ty.List[Path]:
         # Criss-cross pattern
         paths = []
-        equator = logic.Path(
+        equator = Path(
             [Sphere.latlng_to_xyz(0, lng, radius) for lng in range(360)]
         )
         for i in range(100):
-            matrix = np.identity(4)
+            matrix = np.eye(4)
             for j in range(3):
                 v = utility.random_unit_vector()
                 matrix = utility.matrix_mul_matrix(
                     utility.vector_rotate(v, np.random.random() * 2 * np.pi),
                     matrix,
                 )
-                matrix = utility.matrix_mul_matrix(
-                    utility.vector_translate(center), matrix
-                )
-                paths.append(equator.transform(matrix))
+            matrix = utility.matrix_mul_matrix(
+                utility.vector_translate(center), matrix
+            )
+            paths.append(equator.transform(matrix))
         return paths
 
     @staticmethod
@@ -188,7 +190,7 @@ class OutlineSphere(Sphere):
         self.eye = eye
         self.up = up
 
-    def paths(self) -> logic.Paths:
+    def paths(self) -> Paths:
         hyp = utility.vector_length(self.center - self.eye)
         theta = np.arcsin(self.radius / hyp)
         adj = self.radius / np.tan(theta)
@@ -204,4 +206,4 @@ class OutlineSphere(Sphere):
             a = np.deg2rad(a)
             path.append(c + u * np.cos(a) * r + v * np.sin(a) * r)
 
-        return logic.Paths([path])
+        return Paths([path])

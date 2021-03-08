@@ -90,7 +90,7 @@ class ConeTree(pyln.TransformedOutlineCone):
                 * (1 - p)
                 * 8
             )
-            paths.paths.append(pyln.logic.Path([c, e]))
+            paths.paths.append(pyln.Path([c, e]))
         return paths
 
 

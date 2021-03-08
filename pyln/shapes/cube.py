@@ -3,23 +3,21 @@ import typing as ty
 import numba as nb
 import numpy as np
 
-from .. import logic
+from ..paths import Box, Hit, NoHit, Paths
+from ..shape import Shape
 
 
-class Cube(logic.Shape):
+class Cube(Shape):
     def __init__(self, min_box, max_box):
         super().__init__()
-        if type(min_box) == list or type(max_box) == list:
-            min_box = np.array(min_box, dtype=np.float64)
-            max_box = np.array(max_box, dtype=np.float64)
-        self.min: np.ndarray = min_box
-        self.max: np.ndarray = max_box
-        self.box: logic.Box = logic.Box(self.min, self.max)
+        self.min: np.ndarray = np.asarray(min_box, dtype=np.float64)
+        self.max: np.ndarray = np.asarray(max_box, dtype=np.float64)
+        self.box: Box = Box(self.min, self.max)
 
     def compile(self):
         pass
 
-    def bounding_box(self) -> logic.Box:
+    def bounding_box(self) -> Box:
         return self.box
 
     def contains(self, v: np.ndarray, f: float) -> bool:
@@ -30,14 +28,14 @@ class Cube(logic.Shape):
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> logic.Hit:
+    ) -> Hit:
         ok, root = Cube._intersect(
             self.min, self.max, ray_origin, ray_direction
         )
         if ok:
-            return logic.Hit(self, root)
+            return Hit(self, root)
         else:
-            return logic.NoHit
+            return NoHit
 
     @staticmethod
     @nb.njit(
@@ -60,7 +58,7 @@ class Cube(logic.Shape):
             return True, t0
         return False, 0
 
-    def paths(self) -> logic.Paths:
+    def paths(self) -> Paths:
         x1, y1, z1 = self.min[0], self.min[1], self.min[2]
         x2, y2, z2 = self.max[0], self.max[1], self.max[2]
         paths = [
@@ -77,7 +75,7 @@ class Cube(logic.Shape):
             [[x2, y1, z2], [x2, y2, z2]],
             [[x2, y2, z1], [x2, y2, z2]],
         ]
-        return logic.Paths(paths)
+        return Paths(paths)
 
 
 class StripedCube(Cube):
@@ -85,7 +83,7 @@ class StripedCube(Cube):
         super().__init__(min_box, max_box)
         self.stripes = stripes
 
-    def paths(self) -> logic.Paths:
+    def paths(self) -> Paths:
         paths = []
         x1, y1, z1 = self.min[0], self.min[1], self.min[2]
         x2, y2, z2 = self.max[0], self.max[1], self.max[2]
@@ -97,4 +95,4 @@ class StripedCube(Cube):
             paths.append([[x, y2, z1], [x, y2, z2]])
             paths.append([[x1, y, z1], [x1, y, z2]])
             paths.append([[x2, y, z1], [x2, y, z2]])
-        return logic.Paths(paths)
+        return Paths(paths)

@@ -6,26 +6,29 @@ from pathlib import Path
 
 import numpy as np
 
-from .. import __version__, logic, utility
+from .. import __version__, utility
+from ..paths import Box, Hit, Paths
+from ..shape import Shape
+from ..tree import Tree
 from .cube import Cube
 from .triangle import Triangle
 
 
-class Mesh(logic.Shape):
+class Mesh(Shape):
     def __init__(self, triangles: ty.List[Triangle]):
         super().__init__()
         self.triangles: ty.List[Triangle] = triangles
-        self.tree: ty.Union[logic.Tree, None] = None
-        self.box: logic.Box = logic.Box.BoxForShapes(self.triangles)
+        self.tree: ty.Union[Tree, None] = None
+        self.box: Box = Box.BoxForShapes(self.triangles)
 
     def compile(self):
         if self.tree is None:
             shapes = []
             for triangle in self.triangles:
                 shapes.append(triangle)
-            self.tree = logic.Tree.from_shapes(shapes)
+            self.tree = Tree.from_shapes(shapes)
 
-    def bounding_box(self) -> logic.Box:
+    def bounding_box(self) -> Box:
         return self.box
 
     def contains(self, v: np.ndarray, f: float) -> bool:
@@ -33,35 +36,39 @@ class Mesh(logic.Shape):
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> logic.Hit:
+    ) -> Hit:
         return self.tree.intersect(ray_origin, ray_direction)
 
-    def paths(self) -> logic.Paths:
+    def paths(self) -> Paths:
         result = []
         for t in self.triangles:
             result.extend(t.paths().paths)
-        return logic.Paths(result)
+        return Paths(result)
 
     def update_bounding_box(self):
-        self.box = logic.Box.BoxForShapes(self.triangles)
+        self.box = Box.BoxForShapes(self.triangles)
 
     def unit_cube(self):
-        self.fit_inside(logic.Box(np.zeros(3), np.ones(3)), np.zeros(3))
+        self.fit_inside(Box(np.zeros(3), np.ones(3)), np.zeros(3))
         self.move_to(np.zeros(3), np.array([0.5, 0.5, 0.5]))
 
     def move_to(self, position: np.ndarray, anchor: np.ndarray):
         matrix = utility.vector_translate(position - self.box.anchor(anchor))
         self.transform(matrix)
 
-    def fit_inside(self, box: logic.Box, anchor: np.ndarray):
+    def fit_inside(
+        self, box: Box, anchor: ty.Union[ty.List[float], np.ndarray]
+    ):
+        anchor = np.asarray(anchor, dtype=np.float64)
         scale = np.amin(box.size() / self.bounding_box().size())
         extra = box.size() - (self.bounding_box().size() * scale)
-        matrix = utility.vector_translate(-self.bounding_box().min)
-        matrix = utility.matrix_mul_matrix(
-            utility.vector_scale([scale, scale, scale]), matrix
-        )
-        matrix = utility.matrix_mul_matrix(
-            utility.vector_translate(box.min + (extra * anchor)), matrix
+
+        matrix = utility.matrix_transform(
+            [
+                (utility.Transform.Translate, box.min + (extra * anchor)),
+                (utility.Transform.Scale, [scale, scale, scale]),
+                (utility.Transform.Translate, -self.bounding_box().min),
+            ],
         )
         self.transform(matrix)
 
@@ -199,9 +206,13 @@ class Stl:
 
 
 class Plane:
-    def __init__(self, point: np.ndarray, normal: np.ndarray):
-        self.point = point
-        self.normal = normal
+    def __init__(
+        self,
+        point: ty.Union[ty.List[float], np.ndarray],
+        normal: ty.Union[ty.List[float], np.ndarray],
+    ):
+        self.point: np.ndarray = np.asarray(point, dtype=np.float64)
+        self.normal: np.ndarray = np.asarray(normal, dtype=np.float64)
 
     def intersect_segment(
         self, v0: np.ndarray, v1: np.ndarray
@@ -230,10 +241,10 @@ class Plane:
             return v2, v3, True
         return None, None, False
 
-    def intersect_mesh(self, mesh: Mesh) -> logic.Paths:
+    def intersect_mesh(self, mesh: Mesh) -> Paths:
         result = []
         for triangle in mesh.triangles:
             v1, v2, ok = self.intersect_triangle(triangle)
             if ok:
                 result.append([v1, v2])
-        return logic.Paths(result)
+        return Paths(result)

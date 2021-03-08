@@ -3,10 +3,12 @@ import typing as ty
 import numba as nb
 import numpy as np
 
-from .. import logic, utility
+from .. import utility
+from ..paths import Box, Hit, NoHit, Paths
+from ..shape import Shape
 
 
-class Triangle(logic.Shape):
+class Triangle(Shape):
     def __init__(self, v1=None, v2=None, v3=None):
         super().__init__()
         self.v1 = np.zeros(3) if v1 is None else v1
@@ -18,27 +20,27 @@ class Triangle(logic.Shape):
     def compile(self):
         pass
 
-    def bounding_box(self) -> logic.Box:
+    def bounding_box(self) -> Box:
         return self.box
 
     def update_bounding_box(self):
         min_v = np.minimum(np.minimum(self.v1, self.v2), self.v3)
         max_v = np.maximum(np.maximum(self.v1, self.v2), self.v3)
-        self.box = logic.Box(min_v, max_v)
+        self.box = Box(min_v, max_v)
 
     def contains(self, v: np.ndarray, f: float) -> bool:
         return False
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> logic.Hit:
+    ) -> Hit:
         ok, root = Triangle._intersect(
             self.v1, self.v2, self.v3, ray_origin, ray_direction
         )
         if ok:
-            return logic.Hit(self, root)
+            return Hit(self, root)
         else:
-            return logic.NoHit
+            return NoHit
 
     @staticmethod
     @nb.njit(
@@ -82,8 +84,8 @@ class Triangle(logic.Shape):
             return False, 0
         return True, d
 
-    def paths(self) -> logic.Paths:
-        return logic.Paths(
+    def paths(self) -> Paths:
+        return Paths(
             [[self.v1, self.v2], [self.v2, self.v3], [self.v3, self.v1]]
         )
 

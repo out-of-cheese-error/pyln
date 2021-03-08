@@ -3,18 +3,20 @@ import typing as ty
 import numba as nb
 import numpy as np
 
-from .. import logic, utility
+from .. import utility
+from ..paths import Box, Hit, NoHit, Paths
+from ..shape import Shape, TransformedShape
 
 
-class Cylinder(logic.Shape):
+class Cylinder(Shape):
     def __init__(self, radius: float, z0: float, z1: float):
         super().__init__()
         self.radius = radius
         self.z0 = z0
         self.z1 = z1
 
-    def bounding_box(self) -> logic.Box:
-        return logic.Box(
+    def bounding_box(self) -> Box:
+        return Box(
             np.array([-self.radius, -self.radius, self.z0]),
             np.array([self.radius, self.radius, self.z1]),
         )
@@ -26,14 +28,14 @@ class Cylinder(logic.Shape):
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> logic.Hit:
+    ) -> Hit:
         ok, root = Cylinder._intersect(
             self.radius, self.z0, self.z1, ray_origin, ray_direction
         )
         if ok:
-            return logic.Hit(self, root)
+            return Hit(self, root)
         else:
-            return logic.NoHit
+            return NoHit
 
     @staticmethod
     @nb.njit(
@@ -67,14 +69,14 @@ class Cylinder(logic.Shape):
                 return True, root
         return False, 0
 
-    def paths(self) -> logic.Paths:
+    def paths(self) -> Paths:
         result = []
         for a in range(0, 360, 10):
             a = np.deg2rad(a)
             x = self.radius * np.cos(a)
             y = self.radius * np.sin(a)
             result.append([[x, y, self.z0], [x, y, self.z1]])
-        return logic.Paths(result)
+        return Paths(result)
 
 
 class OutlineCylinder(Cylinder):
@@ -90,7 +92,7 @@ class OutlineCylinder(Cylinder):
         self.eye = eye
         self.up = up
 
-    def paths(self) -> logic.Paths:
+    def paths(self) -> Paths:
         ab = []
         for z in [self.z0, self.z1]:
             center = np.array([0, 0, self.z])
@@ -116,7 +118,7 @@ class OutlineCylinder(Cylinder):
         a0, b0, a1, b1 = ab
         paths.append([[a0[0], a0[1], self.z0], [a1[0], a1[1], self.z1]])
         paths.append([[b0[0], b0[1], self.z0], [b1[0], b1[1], self.z1]])
-        return logic.Paths(paths)
+        return Paths(paths)
 
     @staticmethod
     def TransformedCylinder(
@@ -125,14 +127,17 @@ class OutlineCylinder(Cylinder):
         v0: np.ndarray,
         v1: np.ndarray,
         radius: float,
-    ) -> logic.TransformedShape:
+    ) -> TransformedShape:
         d = v1 - v0
         a = np.arccos(np.dot(utility.vector_normalize(d), up))
         matrix = utility.vector_translate(v0)
         if a != 0:
             u = utility.vector_normalize(np.cross(d, up))
-            matrix = utility.matrix_mul_matrix(
-                utility.vector_translate(v0), utility.vector_rotate(u, a)
+            matrix = utility.matrix_transform(
+                [
+                    (utility.Transform.Translate, v0),
+                    (utility.Transform.Rotate, (u, a)),
+                ],
             )
         outline_cylinder = OutlineCylinder(
             utility.matrix_mul_position_vector(
@@ -143,4 +148,4 @@ class OutlineCylinder(Cylinder):
             0,
             utility.vector_length(d),
         )
-        return logic.TransformedShape(outline_cylinder, matrix)
+        return TransformedShape(outline_cylinder, matrix)

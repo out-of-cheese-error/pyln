@@ -1,5 +1,7 @@
 import typing as ty
 
+from enum import Enum
+
 import numba as nb
 import numpy as np
 
@@ -204,6 +206,47 @@ def random_unit_vector():
         if vector_squared_length(v) > 1:
             continue
         return vector_normalize(v)
+
+
+class Transform(Enum):
+    Identity = 0
+    Scale = 1
+    Rotate = 2
+    Translate = 3
+
+
+def matrix_transform(
+    transforms: ty.List[
+        ty.Tuple[
+            Transform,
+            ty.Union[
+                np.ndarray,
+                ty.Tuple[ty.Union[ty.List[float], np.ndarray], float],
+                ty.Union[ty.List[float], np.ndarray],
+            ],
+        ]
+    ]
+):
+    matrix = np.eye(4)
+    for transform_type, params in transforms[::-1]:
+        if transform_type == Transform.Identity:
+            matrix = matrix_mul_matrix(params, matrix)
+        elif transform_type == Transform.Scale:
+            matrix = matrix_mul_matrix(
+                vector_scale(np.asarray(params, dtype=np.float64)), matrix
+            )
+        elif transform_type == Transform.Rotate:
+            matrix = matrix_mul_matrix(
+                vector_rotate(
+                    np.asarray(params[0], dtype=np.float64), params[1]
+                ),
+                matrix,
+            )
+        elif transform_type == Transform.Translate:
+            matrix = matrix_mul_matrix(
+                vector_translate(np.asarray(params, dtype=np.float64)), matrix
+            )
+    return matrix
 
 
 def compile_numba():

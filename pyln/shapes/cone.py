@@ -3,10 +3,12 @@ import typing as ty
 import numba as nb
 import numpy as np
 
-from .. import logic, utility
+from .. import utility
+from ..paths import Box, Hit, NoHit, Paths
+from ..shape import Shape, TransformedShape
 
 
-class Cone(logic.Shape):
+class Cone(Shape):
     def __init__(self, radius: float, height: float):
         super().__init__()
         self.radius = radius
@@ -16,7 +18,7 @@ class Cone(logic.Shape):
         pass
 
     def bounding_box(self):
-        return logic.Box(
+        return Box(
             np.array([-self.radius, -self.radius, 0]),
             np.array([self.radius, self.radius, self.height]),
         )
@@ -26,14 +28,14 @@ class Cone(logic.Shape):
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> logic.Hit:
+    ) -> Hit:
         ok, root = Cone._intersect(
             self.radius, self.height, ray_origin, ray_direction
         )
         if ok:
-            return logic.Hit(self, root)
+            return Hit(self, root)
         else:
-            return logic.NoHit
+            return NoHit
 
     @staticmethod
     @nb.njit(
@@ -78,14 +80,14 @@ class Cone(logic.Shape):
                     return True, root
         return False, 0
 
-    def paths(self) -> logic.Paths:
+    def paths(self) -> Paths:
         result = []
         for a in range(0, 360, 30):
             a = np.deg2rad(a)
             x = self.radius * np.cos(a)
             y = self.radius * np.sin(a)
             result.append([[x, y, 0], [0, 0, self.height]])
-        return logic.Paths(result)
+        return Paths(result)
 
 
 class OutlineCone(Cone):
@@ -96,7 +98,7 @@ class OutlineCone(Cone):
         self.eye = eye
         self.up = up
 
-    def paths(self) -> logic.Paths:
+    def paths(self) -> Paths:
         center = np.zeros(3)
         hypotenuse = utility.vector_length(center - self.eye)
         theta = np.arcsin(self.radius / hypotenuse)
@@ -117,10 +119,10 @@ class OutlineCone(Cone):
         ]
         paths.append([[a0[0], a0[1], 0], [0, 0, self.height]])
         paths.append([[b0[0], b0[1], 0], [0, 0, self.height]])
-        return logic.Paths(paths)
+        return Paths(paths)
 
 
-class TransformedOutlineCone(logic.TransformedShape):
+class TransformedOutlineCone(TransformedShape):
     def __init__(
         self,
         eye: np.ndarray,
@@ -134,8 +136,11 @@ class TransformedOutlineCone(logic.TransformedShape):
         matrix = utility.vector_translate(v0)
         if a != 0:
             u = utility.vector_normalize(np.cross(d, up))
-            matrix = utility.matrix_mul_matrix(
-                utility.vector_translate(v0), utility.vector_rotate(u, a)
+            matrix = utility.matrix_transform(
+                [
+                    (utility.Transform.Translate, v0),
+                    (utility.Transform.Rotate, (u, a)),
+                ],
             )
         outline_cone = OutlineCone(
             utility.matrix_mul_position_vector(

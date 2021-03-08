@@ -1,9 +1,12 @@
 import numpy as np
 
-from .. import logic, utility
+from .. import utility
+from ..paths import ClipFilter, Hit, Paths
+from ..shape import Shape
+from ..tree import Tree
 
 
-class Scene(logic.Shape):
+class Scene(Shape):
     def __init__(self):
         super().__init__()
         self.shapes = []
@@ -14,14 +17,14 @@ class Scene(logic.Shape):
             shape.compile()
 
         if self.tree is None:
-            self.tree = logic.Tree.from_shapes(self.shapes)
+            self.tree = Tree.from_shapes(self.shapes)
 
     def add(self, shape):
         self.shapes.append(shape)
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> logic.Hit:
+    ) -> Hit:
         return self.tree.intersect(ray_origin, ray_direction)
 
     def visible(self, eye: np.ndarray, point: np.ndarray) -> bool:
@@ -29,11 +32,11 @@ class Scene(logic.Shape):
         hit = self.intersect(point, utility.vector_normalize(v))
         return hit.t >= utility.vector_length(v)
 
-    def paths(self) -> logic.Paths:
+    def paths(self) -> Paths:
         result = []
         for shape in self.shapes:
             result.extend(shape.paths().paths)
-        return logic.Paths(result)
+        return Paths(result)
 
     def render(
         self,
@@ -46,7 +49,7 @@ class Scene(logic.Shape):
         near,
         far,
         step,
-    ) -> logic.Paths:
+    ) -> Paths:
         aspect = width / height
         matrix = utility.matrix_look_at(eye, center, up)
         matrix = utility.matrix_mul_matrix(
@@ -57,15 +60,18 @@ class Scene(logic.Shape):
 
     def render_with_matrix(
         self, matrix: np.ndarray, eye: np.ndarray, width, height, step
-    ) -> logic.Paths:
+    ) -> Paths:
         self.compile()
         paths = self.paths()
         if step > 0:
             paths = paths.chop(step)
-        paths = paths.filter(logic.ClipFilter(matrix, eye, self))
+        paths = paths.filter(ClipFilter(matrix, eye, self))
         if step > 0:
             paths = paths.simplify(1e-6)
-        translation = utility.vector_translate(np.array([1.0, 1.0, 0.0]))
-        scale = utility.vector_scale([width / 2, height / 2, 0])
-        matrix = utility.matrix_mul_matrix(scale, translation)
+        matrix = utility.matrix_transform(
+            [
+                (utility.Transform.Scale, [width / 2, height / 2, 0]),
+                (utility.Transform.Translate, [1, 1, 0]),
+            ],
+        )
         return paths.transform(matrix)

@@ -4,7 +4,8 @@ from enum import Enum
 
 import numpy as np
 
-from .. import logic
+from ..paths import Box, Hit, NoHit, Paths
+from ..shape import Shape
 
 
 class Direction(Enum):
@@ -12,11 +13,11 @@ class Direction(Enum):
     Below = 1
 
 
-class Function(logic.Shape):
+class Function(Shape):
     def __init__(
         self,
         func: ty.Callable[[float, float], float],
-        box: logic.Box,
+        box: Box,
         direction: Direction,
     ):
         super().__init__()
@@ -24,7 +25,7 @@ class Function(logic.Shape):
         self.box = box
         self.direction = direction
 
-    def bounding_box(self) -> logic.Box:
+    def bounding_box(self) -> Box:
         return self.box
 
     def contains(self, v: np.ndarray, f: float) -> bool:
@@ -35,16 +36,16 @@ class Function(logic.Shape):
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> logic.Hit:
+    ) -> Hit:
         step = 1 / 64
         sign = self.contains(ray_origin + (step * ray_direction), 0)
         for t in np.arange(step, 10, step):
             v = ray_origin + (t * ray_direction)
             if self.contains(v, 0) != sign and self.box.contains(v):
-                return logic.Hit(self, t)
-        return logic.NoHit
+                return Hit(self, t)
+        return NoHit
 
-    def paths(self) -> logic.Paths:
+    def paths(self) -> Paths:
         fine = 1 / 256
         n_paths = 72
         n_per_path = np.arange(0, 8, fine).shape[0]
@@ -59,4 +60,4 @@ class Function(logic.Shape):
                 z = np.minimum(z, self.box.max[2])
                 z = np.maximum(z, self.box.min[2])
                 paths[paths_index, path_index] = [x, y, z]
-        return logic.Paths(paths)
+        return Paths(paths)
