@@ -169,6 +169,7 @@ python-versions = ">=3.4"
 [package.dependencies]
 smmap2 = ">=2,<3"
 
+
 [[package]]
 name = "gitpython"
 version = "3.0.9"
