@@ -62,11 +62,15 @@ def vector_rotate(vector: np.ndarray, a: float) -> np.ndarray:
             ],
             [0.0, 0.0, 0.0, 1.0],
         ]
-    )
+    ).T
 
 
+@nb.njit("float64[:,:](float64[:])", cache=True)
 def vector_scale(vector):
-    return np.diagflat([vector[0], vector[1], vector[2], 1.0])
+    matrix = np.eye(4)
+    for i in range(3):
+        matrix[i, i] = vector[i]
+    return matrix
 
 
 @nb.njit("float64[:](float64[:,:], float64[:])", cache=True)
