@@ -51,6 +51,7 @@ class Scene(Shape):
         near,
         far,
         step,
+        debug=False,
     ) -> Paths:
         eye = np.asarray(eye, dtype=np.float64)
         center = np.asarray(center, dtype=np.float64)
@@ -61,18 +62,32 @@ class Scene(Shape):
             utility.matrix_perspective_projection(fovy, aspect, near, far),
             matrix,
         )
-        return self.render_with_matrix(matrix, eye, width, height, step)
+        return self.render_with_matrix(matrix, eye, width, height, step, debug)
 
     def render_with_matrix(
-        self, matrix: np.ndarray, eye: np.ndarray, width, height, step
+        self,
+        matrix: np.ndarray,
+        eye: np.ndarray,
+        width,
+        height,
+        step,
+        debug=False,
     ) -> Paths:
         self.compile()
         paths = self.paths()
+        if debug:
+            print(f"Starting with {len(paths.paths)} paths")
         if step > 0:
             paths = paths.chop(step)
+            if debug:
+                print(f"After chopping: {len(paths.paths)} paths")
         paths = paths.filter(ClipFilter(matrix, eye, self))
+        if debug:
+            print(f"After filtering: {len(paths.paths)} paths")
         if step > 0:
             paths = paths.simplify(1e-6)
+            if debug:
+                print(f"After simplifying {len(paths.paths)} paths")
         matrix = utility.matrix_transform(
             [
                 (utility.Transform.Scale, [width / 2, height / 2, 0]),
