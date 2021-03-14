@@ -23,10 +23,7 @@ class Mesh(Shape):
 
     def compile(self):
         if self.tree is None:
-            shapes = []
-            for triangle in self.triangles:
-                shapes.append(triangle)
-            self.tree = Tree.from_shapes(shapes)
+            self.tree = Tree.from_shapes(self.triangles)
 
     def bounding_box(self) -> Box:
         return self.box
@@ -74,10 +71,7 @@ class Mesh(Shape):
 
     def transform(self, matrix: np.ndarray):
         for t in self.triangles:
-            t.v1 = utility.matrix_mul_position_vector(matrix, t.v1)
-            t.v2 = utility.matrix_mul_position_vector(matrix, t.v2)
-            t.v3 = utility.matrix_mul_position_vector(matrix, t.v3)
-            t.update_bounding_box()
+            t.transform(matrix)
         self.update_bounding_box()
         self.tree = None
 

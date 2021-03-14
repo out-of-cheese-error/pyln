@@ -81,6 +81,9 @@ class Shape:
         translate = np.asarray(translate, dtype=np.float64)
         return TransformedShape(self, utility.vector_translate(translate))
 
+    def transform(self, matrix: np.ndarray):
+        return TransformedShape(self, matrix)
+
 
 class TransformedShape(Shape):
     def __init__(self, shape: Shape, matrix: np.ndarray):
