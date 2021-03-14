@@ -105,6 +105,12 @@ class Triangle(Shape):
             [[self.v1, self.v2], [self.v2, self.v3], [self.v3, self.v1]]
         )
 
+    def transform(self, matrix: np.ndarray):
+        self.v1 = utility.matrix_mul_position_vector(matrix, self.v1)
+        self.v2 = utility.matrix_mul_position_vector(matrix, self.v2)
+        self.v3 = utility.matrix_mul_position_vector(matrix, self.v3)
+        self.update_bounding_box()
+
     def show_tree(self, level):
         result = level * " "
         for vector in [self.v1, self.v2, self.v3]:
