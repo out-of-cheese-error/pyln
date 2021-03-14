@@ -21,17 +21,19 @@ class Box:
         self.box = np.array([min_box, max_box], dtype=np.float64)
 
     @classmethod
+    def empty(cls):
+        min_box = np.zeros(3)
+        min_box[:] = utility.INF
+        return Box(min_box, np.zeros(3))
+
+    @classmethod
     def BoxForShapes(cls, shapes) -> "Box":
-        assert len(shapes)
+        if not len(shapes):
+            return Box.empty()
         box = shapes[0].bounding_box()
         for shape in shapes:
             box = box.extend(shape.bounding_box())
         return box
-
-    @classmethod
-    def BoxForVectors(cls, vectors: ty.List[np.ndarray]) -> "Box":
-        assert len(vectors)
-        return Box(np.min(vectors, axis=0), np.max(vectors, axis=0))
 
     @property
     def min(self) -> np.ndarray:
