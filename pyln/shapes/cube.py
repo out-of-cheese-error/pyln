@@ -32,9 +32,7 @@ class Cube(Shape):
                 return False
         return True
 
-    def intersect(
-        self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> float:
+    def intersect(self, ray_origin: np.ndarray, ray_direction: np.ndarray) -> float:
         return Cube._intersect(self.min, self.max, ray_origin, ray_direction)
 
     @staticmethod

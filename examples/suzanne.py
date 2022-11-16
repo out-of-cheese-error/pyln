@@ -10,9 +10,9 @@ def main():
     scene.add(mesh.rotate_y(30))
 
     # define camera parameters
-    eye = [-0.5, 0.5, 2]  # camera position
-    center = [0, 0, 0]  # camera looks at
-    up = [0, 1, 0]  # up direction
+    eye = [-0.5, 0.5, 2.0]  # camera position
+    center = [0.0, 0.0, 0.0]  # camera looks at
+    up = [0.0, 1.0, 0.0]  # up direction
 
     # define rendering parameters
     width = 1024  # rendered width
@@ -23,9 +23,7 @@ def main():
     step = 0.01  # how finely to chop the paths for visibility testing
 
     # compute 2D paths that depict the 3D scene
-    paths = scene.render(
-        eye, center, up, width, height, fovy, znear, zfar, step
-    )
+    paths = scene.render(eye, center, up, width, height, fovy, znear, zfar, step)
 
     # save results
     paths.write_to_svg(

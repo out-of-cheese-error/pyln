@@ -31,9 +31,7 @@ class Mesh(Shape):
     def contains(self, v: np.ndarray, f: float) -> bool:
         return False
 
-    def intersect(
-        self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> float:
+    def intersect(self, ray_origin: np.ndarray, ray_direction: np.ndarray) -> float:
         return self.tree.intersect(ray_origin, ray_direction)
 
     def paths(self) -> Paths:
@@ -53,9 +51,7 @@ class Mesh(Shape):
         matrix = utility.vector_translate(position - self.box.anchor(anchor))
         self.transform(matrix)
 
-    def fit_inside(
-        self, box: Box, anchor: ty.Union[ty.List[float], np.ndarray]
-    ):
+    def fit_inside(self, box: Box, anchor: ty.Union[ty.List[float], np.ndarray]):
         anchor = np.asarray(anchor, dtype=np.float64)
         scale = np.amin(box.size() / self.bounding_box().size())
         extra = box.size() - (self.bounding_box().size() * scale)
@@ -127,14 +123,10 @@ class Mesh(Shape):
             for line in file:
                 fields = line.split()
                 if len(fields) == 4 and fields[0] == "vertex":
-                    vertexes.append(
-                        np.array([float(f) for f in fields[1 : 1 + 3]])
-                    )
+                    vertexes.append(np.array([float(f) for f in fields[1 : 1 + 3]]))
         triangles = []
         for i in range(0, len(vertexes), 3):
-            triangles.append(
-                Triangle(vertexes[i], vertexes[i + 1], vertexes[i + 2])
-            )
+            triangles.append(Triangle(vertexes[i], vertexes[i + 1], vertexes[i + 2]))
         return Mesh(triangles)
 
     @classmethod
@@ -153,9 +145,7 @@ class Mesh(Shape):
 
     def write_binary_stl(self, path: str):
         # Format the header
-        header = (
-            f"pyln ({__version__}) {datetime.datetime.now()} {Path(path).stem}"
-        )
+        header = f"pyln ({__version__}) {datetime.datetime.now()} {Path(path).stem}"
         # Make it exactly 80 characters
         header = header[:80].ljust(80, " ")
         data = np.zeros(len(self.triangles), dtype=Stl.dtype)

@@ -6,21 +6,16 @@ def main():
     sphere = pyln.Sphere(texture=1)
     cube = pyln.StripedCube([-0.8, -0.8, -0.8], [0.8, 0.8, 0.8], 20)
     cylinder = pyln.Cylinder(0.4, -2.0, 2.0)
-    shape = (
-        (sphere & cube)
-        - cylinder
-        - cylinder.rotate_x(90)
-        - cylinder.rotate_y(90)
-    )
+    shape = (sphere & cube) - cylinder - cylinder.rotate_x(90) - cylinder.rotate_y(90)
     images = []
     for index, i in enumerate(range(0, 90, 10)):
         scene = pyln.Scene()
         scene.add(shape.rotate_z(i))
 
         # define camera parameters
-        eye = [0, 6, 2]  # camera position
-        center = [0, 0, 0]  # camera looks at
-        up = [0, 0, 1]  # up direction
+        eye = [0.0, 6.0, 2.0]  # camera position
+        center = [0.0, 0.0, 0.0]  # camera looks at
+        up = [0.0, 0.0, 1.0]  # up direction
 
         # define rendering parameters
         width = 750  # rendered width
@@ -31,9 +26,7 @@ def main():
         step = 0.01  # how finely to chop the paths for visibility testing
 
         # compute 2D paths that depict the 3D scene
-        paths = scene.render(
-            eye, center, up, width, height, fovy, znear, zfar, step
-        )
+        paths = scene.render(eye, center, up, width, height, fovy, znear, zfar, step)
         images.append(paths.to_image(width, height))
 
     # save results

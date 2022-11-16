@@ -14,12 +14,12 @@ INF = 1e9
 
 @nb.njit("float64(float64[:])", cache=True)
 def vector_length(v: np.ndarray) -> float:
-    return np.sqrt(np.sum(v ** 2.0, axis=-1))
+    return np.sqrt(np.sum(v**2.0, axis=-1))
 
 
 @nb.njit("float64(float64[:])", cache=True)
 def vector_squared_length(v: np.ndarray) -> float:
-    return np.sum(v ** 2.0, axis=-1)
+    return np.sum(v**2.0, axis=-1)
 
 
 @nb.njit("float64[:](float64[:])", cache=True)
@@ -74,9 +74,7 @@ def vector_scale(vector):
 
 
 @nb.njit("float64[:](float64[:,:], float64[:])", cache=True)
-def matrix_mul_position_vector(
-    matrix: np.ndarray, vector: np.ndarray
-) -> np.ndarray:
+def matrix_mul_position_vector(matrix: np.ndarray, vector: np.ndarray) -> np.ndarray:
     output = np.array([vector[0], vector[1], vector[2], 1.0])
     output = np.dot(output, matrix)
     output /= output[3]
@@ -84,9 +82,7 @@ def matrix_mul_position_vector(
 
 
 @nb.njit("float64[:](float64[:,:], float64[:])", cache=True)
-def matrix_mul_direction_vector(
-    matrix: np.ndarray, vector: np.ndarray
-) -> np.ndarray:
+def matrix_mul_direction_vector(matrix: np.ndarray, vector: np.ndarray) -> np.ndarray:
     return vector_normalize(np.dot(vector, matrix[:3, :3]))
 
 
@@ -172,14 +168,8 @@ def matrix_mul_box(
     ya, yb = (up * min_box[1], up * max_box[1])
     za, zb = (backward * min_box[2], backward * max_box[2])
     return (
-        np.minimum(xa, xb)
-        + np.minimum(ya, yb)
-        + np.minimum(za, zb)
-        + translation,
-        np.maximum(xa, xb)
-        + np.maximum(ya, yb)
-        + np.maximum(za, zb)
-        + translation,
+        np.minimum(xa, xb) + np.minimum(ya, yb) + np.minimum(za, zb) + translation,
+        np.maximum(xa, xb) + np.maximum(ya, yb) + np.maximum(za, zb) + translation,
     )
 
 
@@ -244,9 +234,7 @@ def matrix_transform(
             )
         elif transform_type == Transform.Rotate:
             matrix = matrix_mul_matrix(
-                vector_rotate(
-                    np.asarray(params[0], dtype=np.float64), params[1]
-                ),
+                vector_rotate(np.asarray(params[0], dtype=np.float64), params[1]),
                 matrix,
             )
         elif transform_type == Transform.Translate:

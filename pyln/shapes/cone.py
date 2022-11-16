@@ -31,12 +31,8 @@ class Cone(Shape):
     def contains(self, v: np.ndarray, f: float) -> bool:
         return False
 
-    def intersect(
-        self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> float:
-        return Cone._intersect(
-            self.radius, self.height, ray_origin, ray_direction
-        )
+    def intersect(self, ray_origin: np.ndarray, ray_direction: np.ndarray) -> float:
+        return Cone._intersect(self.radius, self.height, ray_origin, ray_direction)
 
     @staticmethod
     @nb.njit(
@@ -51,21 +47,13 @@ class Cone(Shape):
     ) -> float:
         k = radius / height
         k *= k
-        a = (
-            ray_direction[0] ** 2
-            - ray_direction[1] ** 2
-            - k * ray_direction[2] ** 2
-        )
+        a = ray_direction[0] ** 2 - ray_direction[1] ** 2 - k * ray_direction[2] ** 2
         b = 2 * (
             ray_direction[0] * ray_origin[0]
             + ray_direction[1] * ray_origin[1]
             - k * ray_direction[2] * (ray_origin[2] - height)
         )
-        c = (
-            ray_origin[0] ** 2
-            + ray_origin[1] ** 2
-            - k * (ray_origin[2] - height) ** 2
-        )
+        c = ray_origin[0] ** 2 + ray_origin[1] ** 2 - k * (ray_origin[2] - height) ** 2
         slope = b * b - 4 * a * c
         if slope <= 0:
             return utility.INF
@@ -92,9 +80,7 @@ class Cone(Shape):
 
 
 class OutlineCone(Cone):
-    def __init__(
-        self, eye: np.ndarray, up: np.ndarray, radius: float, height: float
-    ):
+    def __init__(self, eye: np.ndarray, up: np.ndarray, radius: float, height: float):
         super().__init__(radius, height)
         self.eye = eye
         self.up = up
@@ -144,9 +130,7 @@ class TransformedOutlineCone(TransformedShape):
                 ],
             )
         outline_cone = OutlineCone(
-            utility.matrix_mul_position_vector(
-                utility.matrix_inverse(matrix), eye
-            ),
+            utility.matrix_mul_position_vector(utility.matrix_inverse(matrix), eye),
             up,
             radius,
             utility.vector_length(d),

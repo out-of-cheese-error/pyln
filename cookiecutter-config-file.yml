@@ -5,6 +5,9 @@ default_context:
   project_description: "3D line art engine (Python port of fogleman/ln)"
   organization: "out-of-cheese-error"
   license: "MIT"
+  minimal_python_version: 3.9
   version: "0.1.0"
   github_name: "out-of-cheese-error"
   email: "justacythonblog@gmail.com"
+  line_length: "88"
+  create_example_template: "none"

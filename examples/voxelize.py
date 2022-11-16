@@ -13,22 +13,20 @@ def main():
         scene.add(cube)
 
     # define camera parameters
-    eye = [-1, -2, 0]  # camera position
-    center = [0, 0, 0]  # camera looks at
-    up = [0, 0, 1]  # up direction
+    eye = [-1.0, -2.0, 0.0]  # camera position
+    center = [0.0, 0.0, 0.0]  # camera looks at
+    up = [0.0, 0.0, 1.0]  # up direction
 
     # define rendering parameters
-    width = 1024 / 2  # rendered width
-    height = 1024 / 2  # rendered height
+    width = 1024 // 2  # rendered width
+    height = 1024 // 2  # rendered height
     fovy = 60.0  # vertical field of view, degrees
     znear = 0.1  # near z plane
     zfar = 100.0  # far z plane
     step = 0.01  # how finely to chop the paths for visibility testing
 
     # compute 2D paths that depict the 3D scene
-    paths = scene.render(
-        eye, center, up, width, height, fovy, znear, zfar, step
-    )
+    paths = scene.render(eye, center, up, width, height, fovy, znear, zfar, step)
 
     # save results
     paths.write_to_svg(

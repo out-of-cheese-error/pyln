@@ -56,9 +56,7 @@ class Box:
         return all(self.min[i] <= b[i] <= self.max[i] for i in range(3))
 
     def extend(self, other):
-        return Box(
-            np.minimum(self.min, other.min), np.maximum(self.max, other.max)
-        )
+        return Box(np.minimum(self.min, other.min), np.maximum(self.max, other.max))
 
     def intersect(
         self, ray_origin: np.ndarray, ray_direction: np.ndarray
@@ -130,9 +128,7 @@ class Path:
         return box
 
     def transform(self, matrix: np.ndarray):
-        return [
-            utility.matrix_mul_position_vector(matrix, v) for v in self.path
-        ]
+        return [utility.matrix_mul_position_vector(matrix, v) for v in self.path]
 
     def chop(self, step):
         result = []
@@ -260,14 +256,10 @@ class Paths:
                 )
         return im
 
-    def write_to_png(
-        self, file_path: str, width, height, fill="black", linewidth=3
-    ):
+    def write_to_png(self, file_path: str, width, height, fill="black", linewidth=3):
         self.to_image(width, height, fill, linewidth).save(file_path)
 
-    def to_svg(
-        self, width, height, line_color="black", background_color=None
-    ) -> str:
+    def to_svg(self, width, height, line_color="black", background_color=None) -> str:
         if background_color is None:
             bg = ""
         else:

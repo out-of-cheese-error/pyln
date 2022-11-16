@@ -31,9 +31,7 @@ class Cylinder(Shape):
             return False
         return self.z0 - f <= v[2] <= self.z1 + f
 
-    def intersect(
-        self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> float:
+    def intersect(self, ray_origin: np.ndarray, ray_direction: np.ndarray) -> float:
         return Cylinder._intersect(
             self.radius, self.z0, self.z1, ray_origin, ray_direction
         )
@@ -51,11 +49,8 @@ class Cylinder(Shape):
         ray_direction: np.ndarray,
     ) -> float:
         a = ray_direction[0] ** 2 + ray_direction[1] ** 2
-        b = (
-            2 * ray_origin[0] * ray_direction[0]
-            + 2 * ray_origin[1] * ray_direction[1]
-        )
-        c = ray_origin[0] ** 2 + ray_origin[1] ** 2 - radius ** 2
+        b = 2 * ray_origin[0] * ray_direction[0] + 2 * ray_origin[1] * ray_direction[1]
+        c = ray_origin[0] ** 2 + ray_origin[1] ** 2 - radius**2
         slope = b * b - 4 * a * c
         if slope < 0:
             return utility.INF
@@ -141,9 +136,7 @@ class OutlineCylinder(Cylinder):
                 ],
             )
         outline_cylinder = OutlineCylinder(
-            utility.matrix_mul_position_vector(
-                utility.matrix_inverse(matrix), eye
-            ),
+            utility.matrix_mul_position_vector(utility.matrix_inverse(matrix), eye),
             up,
             radius,
             0,

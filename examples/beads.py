@@ -1,10 +1,11 @@
 import numba as nb
 import numpy as np
+
 import pyln
 
 
 @nb.njit(cache=True)
-def low_pass(values: np.ndarray, alpha: float):
+def low_pass(values: np.ndarray, alpha: float) -> np.ndarray:
     result = np.zeros_like(values)
     y = 0.0
     for i in range(values.shape[0]):
@@ -14,14 +15,14 @@ def low_pass(values: np.ndarray, alpha: float):
 
 
 @nb.njit(cache=True)
-def normalize(values: np.ndarray, a: float, b: float):
+def normalize(values: np.ndarray, a: float, b: float) -> float:
     lo = np.amin(values)
     hi = np.amax(values)
     return ((values - lo) / (hi - lo)) * (b - a) + a
 
 
 @nb.njit(cache=True)
-def low_pass_noise(num: int, alpha: float, iterations: int):
+def low_pass_noise(num: int, alpha: float, iterations: int) -> float:
     result = np.random.random(num)
     for i in range(iterations):
         result = low_pass(result, alpha)
@@ -31,9 +32,9 @@ def low_pass_noise(num: int, alpha: float, iterations: int):
 def main():
     pyln.utility.compile_numba()
     # define camera parameters
-    eye = [8, 8, 8]  # camera position
-    center = [0, 0, 0]  # camera looks at
-    up = [0, 0, 1]  # up direction
+    eye = [8.0, 8.0, 8.0]  # camera position
+    center = [0.0, 0.0, 0.0]  # camera looks at
+    up = [0.0, 0.0, 1.0]  # up direction
 
     scene = pyln.Scene()
     position = np.zeros(3)
@@ -53,9 +54,7 @@ def main():
     zfar = 100.0  # far z plane
     step = 0.01  # how finely to chop the paths for visibility testing
     # compute 2D paths that depict the 3D scene
-    paths = scene.render(
-        eye, center, up, width, height, fovy, znear, zfar, step
-    )
+    paths = scene.render(eye, center, up, width, height, fovy, znear, zfar, step)
 
     # save results
     paths.write_to_svg(

@@ -22,8 +22,7 @@ class Node:
             return self.intersect_shapes(ray_origin, ray_direction)
         tsplit = (self.point - ray_origin[self.axis]) / ray_direction[self.axis]
         left_first = (ray_origin[self.axis] < self.point) or (
-            ray_origin[self.axis] == self.point
-            and ray_direction[self.axis] <= 0
+            ray_origin[self.axis] == self.point and ray_direction[self.axis] <= 0
         )
         if left_first:
             first = self.left
@@ -39,9 +38,7 @@ class Node:
             h1 = first.intersect(ray_origin, ray_direction, tmin, tsplit)
             if h1 <= tsplit:
                 return h1
-            h2 = second.intersect(
-                ray_origin, ray_direction, tsplit, min(tmax, h1)
-            )
+            h2 = second.intersect(ray_origin, ray_direction, tsplit, min(tmax, h1))
             if h1 <= h2:
                 return h1
             else:

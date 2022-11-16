@@ -1,5 +1,5 @@
 default_language_version:
-  python: python3.7
+  python: python3.9
 
 default_stages: [commit, push]
 
@@ -9,12 +9,13 @@ repos:
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
+        exclude: LICENSE
 
   - repo: local
     hooks:
       - id: pyupgrade
         name: pyupgrade
-        entry: poetry run pyupgrade --py37-plus
+        entry: poetry run pyupgrade --py39-plus
         types: [python]
         language: system
 

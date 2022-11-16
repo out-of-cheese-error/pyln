@@ -1,4 +1,5 @@
 import numpy as np
+
 import pyln
 
 
@@ -14,13 +15,11 @@ def main():
             fx = x + (np.random.random() * 0.5 - 0.25)
             fy = y + (np.random.random() * 0.5 - 0.25)
             fz = np.random.random() * 3 + 1
-            scene.add(
-                pyln.StripedCube([fx - p, fy - p, 0], [fx + p, fy + p, fz], 10)
-            )
+            scene.add(pyln.StripedCube([fx - p, fy - p, 0], [fx + p, fy + p, fz], 10))
     # define camera parameters
-    eye = [1.75, 1.25, 6]  # camera position
-    center = [0, 0, 0]  # camera looks at
-    up = [0, 0, 1]  # up direction
+    eye = [1.75, 1.25, 6.0]  # camera position
+    center = [0.0, 0.0, 0.0]  # camera looks at
+    up = [0.0, 0.0, 1.0]  # up direction
 
     # define rendering parameters
     width = 1024  # rendered width
@@ -31,9 +30,7 @@ def main():
     step = 0.01  # how finely to chop the paths for visibility testing
 
     # compute 2D paths that depict the 3D scene
-    paths = scene.render(
-        eye, center, up, width, height, fovy, znear, zfar, step
-    )
+    paths = scene.render(eye, center, up, width, height, fovy, znear, zfar, step)
 
     # save results
     paths.write_to_svg(

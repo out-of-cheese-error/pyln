@@ -21,9 +21,7 @@ class Shape:
     def contains(self, v: np.ndarray, f: float) -> bool:
         pass
 
-    def intersect(
-        self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> float:
+    def intersect(self, ray_origin: np.ndarray, ray_direction: np.ndarray) -> float:
         pass
 
     def paths(self) -> Paths:
@@ -105,9 +103,7 @@ class TransformedShape(Shape):
             utility.matrix_mul_position_vector(self.inverse, v), f
         )
 
-    def intersect(
-        self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> float:
+    def intersect(self, ray_origin: np.ndarray, ray_direction: np.ndarray) -> float:
         origin, direction = utility.matrix_mul_ray(
             self.inverse, ray_origin, ray_direction
         )
@@ -150,16 +146,12 @@ class BooleanShape(Shape, Filter):
         if self.op == Op.Intersection:
             return self.shape_a.contains(v, f) and self.shape_b.contains(v, f)
         elif self.op == Op.Difference:
-            return self.shape_a.contains(v, f) and not self.shape_b.contains(
-                v, -f
-            )
+            return self.shape_a.contains(v, f) and not self.shape_b.contains(v, -f)
         elif self.op == Op.Union:
             return self.shape_a.contains(v, f) or self.shape_b.contains(v, f)
         return False
 
-    def intersect(
-        self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> float:
+    def intersect(self, ray_origin: np.ndarray, ray_direction: np.ndarray) -> float:
         hit_a = self.shape_a.intersect(ray_origin, ray_direction)
         hit_b = self.shape_b.intersect(ray_origin, ray_direction)
         if hit_a <= hit_b:

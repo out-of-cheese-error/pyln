@@ -35,9 +35,7 @@ class Function(Shape):
         else:
             return v[2] > self.func(v[0], v[1])
 
-    def intersect(
-        self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> float:
+    def intersect(self, ray_origin: np.ndarray, ray_direction: np.ndarray) -> float:
         step = 1 / 64
         sign = self.contains(ray_origin + (step * ray_direction), 0)
         for t in np.arange(step, 10, step):

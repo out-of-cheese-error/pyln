@@ -47,12 +47,8 @@ class Triangle(Shape):
     def contains(self, v: np.ndarray, f: float) -> bool:
         return False
 
-    def intersect(
-        self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> float:
-        return Triangle._intersect(
-            self.v1, self.v2, self.v3, ray_origin, ray_direction
-        )
+    def intersect(self, ray_origin: np.ndarray, ray_direction: np.ndarray) -> float:
+        return Triangle._intersect(self.v1, self.v2, self.v3, ray_origin, ray_direction)
 
     @staticmethod
     @nb.njit(
@@ -87,9 +83,7 @@ class Triangle(Shape):
         qy = t[2] * e1[0] - t[0] * e1[2]
         qz = t[0] * e1[1] - t[1] * e1[0]
         v = (
-            ray_direction[0] * qx
-            + ray_direction[1] * qy
-            + ray_direction[2] * qz
+            ray_direction[0] * qx + ray_direction[1] * qy + ray_direction[2] * qz
         ) * inv
 
         if v < 0.0 or (u + v) > 1.0:
@@ -101,9 +95,7 @@ class Triangle(Shape):
         return d
 
     def paths(self) -> Paths:
-        return Paths(
-            [[self.v1, self.v2], [self.v2, self.v3], [self.v3, self.v1]]
-        )
+        return Paths([[self.v1, self.v2], [self.v2, self.v3], [self.v3, self.v1]])
 
     def transform(self, matrix: np.ndarray):
         self.v1 = utility.matrix_mul_position_vector(matrix, self.v1)

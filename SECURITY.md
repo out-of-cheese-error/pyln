@@ -7,7 +7,7 @@
 
 Vulnerabilities can be reported by emailing core members:
 
-- out-of-cheese-error [justacythonblog@gmail.com](mailto:justacythonblog@gmail.com)
+- Ninjani [justacythonblog@gmail.com](mailto:justacythonblog@gmail.com)
 
 Please include the requested information listed below (as much as you can provide) to help us better understand the nature and scope of the possible issue:
 

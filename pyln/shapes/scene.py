@@ -24,9 +24,7 @@ class Scene(Shape):
     def add(self, shape):
         self.shapes.append(shape)
 
-    def intersect(
-        self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> float:
+    def intersect(self, ray_origin: np.ndarray, ray_direction: np.ndarray) -> float:
         return self.tree.intersect(ray_origin, ray_direction)
 
     def visible(self, eye: np.ndarray, point: np.ndarray) -> bool:

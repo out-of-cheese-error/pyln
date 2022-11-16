@@ -17,9 +17,7 @@ class Sphere(Shape):
     def __init__(self, center=None, radius=1.0, texture=1):
         super().__init__()
         self.center = (
-            np.zeros(3)
-            if center is None
-            else np.asarray(center, dtype=np.float64)
+            np.zeros(3) if center is None else np.asarray(center, dtype=np.float64)
         )
         self.radius = radius
         radius_vec = np.array([radius, radius, radius], dtype=np.float64)
@@ -35,12 +33,8 @@ class Sphere(Shape):
     def contains(self, v: np.ndarray, f) -> bool:
         return utility.vector_length(v - self.center) <= self.radius + f
 
-    def intersect(
-        self, ray_origin: np.ndarray, ray_direction: np.ndarray
-    ) -> float:
-        return Sphere._intersect(
-            self.radius, self.center, ray_origin, ray_direction
-        )
+    def intersect(self, ray_origin: np.ndarray, ray_direction: np.ndarray) -> float:
+        return Sphere._intersect(self.radius, self.center, ray_origin, ray_direction)
 
     @staticmethod
     @nb.njit(
@@ -81,9 +75,7 @@ class Sphere(Shape):
             return Paths(Sphere.paths_4(self.radius, self.center))
 
     @staticmethod
-    def paths_1(
-        radius: float, center: np.ndarray
-    ) -> ty.List[ty.List[np.ndarray]]:
+    def paths_1(radius: float, center: np.ndarray) -> ty.List[ty.List[np.ndarray]]:
         # Grid pattern
         paths = []
         n = 5
@@ -108,9 +100,7 @@ class Sphere(Shape):
     def paths_2(radius: float, center: np.ndarray) -> ty.List[Path]:
         # Criss-cross pattern
         paths = []
-        equator = Path(
-            [Sphere.latlng_to_xyz(0, lng, radius) for lng in range(360)]
-        )
+        equator = Path([Sphere.latlng_to_xyz(0, lng, radius) for lng in range(360)])
         for i in range(100):
             matrix = np.eye(4)
             for j in range(3):
@@ -119,9 +109,7 @@ class Sphere(Shape):
                     utility.vector_rotate(v, np.random.random() * 2 * np.pi),
                     matrix,
                 )
-            matrix = utility.matrix_mul_matrix(
-                utility.vector_translate(center), matrix
-            )
+            matrix = utility.matrix_mul_matrix(utility.vector_translate(center), matrix)
             paths.append(equator.transform(matrix))
         return paths
 
@@ -136,9 +124,7 @@ class Sphere(Shape):
         return paths
 
     @staticmethod
-    def paths_4(
-        radius: float, center: np.ndarray
-    ) -> ty.List[ty.List[np.ndarray]]:
+    def paths_4(radius: float, center: np.ndarray) -> ty.List[ty.List[np.ndarray]]:
         # Criss-cross with circles
         paths = []
         seen = []
@@ -157,9 +143,7 @@ class Sphere(Shape):
                     seen.append(v)
                     radii.append(m)
                     break
-            p = utility.vector_normalize(
-                np.cross(v, utility.random_unit_vector())
-            )
+            p = utility.vector_normalize(np.cross(v, utility.random_unit_vector()))
             q = utility.vector_normalize(np.cross(p, v))
             n = np.random.randint(0, 4) + 1
             for k in range(n):
