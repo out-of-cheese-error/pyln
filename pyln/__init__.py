@@ -1,11 +1,6 @@
-# type: ignore[attr-defined]
 """3D line art engine (Python port of fogleman/ln)"""
 
-try:
-    from importlib.metadata import PackageNotFoundError, version
-except ImportError:  # pragma: no cover
-    from importlib_metadata import PackageNotFoundError, version
-
+from importlib_metadata import PackageNotFoundError, version
 
 try:
     __version__ = version(__name__)

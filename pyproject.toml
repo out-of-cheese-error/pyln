@@ -10,7 +10,7 @@ version = "0.1.0"
 description = "3D line art engine (Python port of fogleman/ln)"
 readme = "README.md"
 authors = [
-  "out-of-cheese-error <justacythonblog@gmail.com>"
+  "Ninjani"
 ]
 license = "MIT"
 repository = "https://github.com/out-of-cheese-error/pyln"
@@ -32,29 +32,30 @@ classifiers = [  # Update me
 "pyln" = "pyln.__main__:app"
 
 [tool.poetry.dependencies]
-python = ">=3.7,<3.10"
-importlib_metadata = {version = "^4.0.1", python = "<3.8"}
-numpy = "^1.21.5"
-numba = "^0.53.1"
-Pillow = "^8.4.0"
+python = ">=3.8,<4.0"
+Pillow = "^9.1.0"
+numpy = "^1.23.4"
+importlib-metadata = "^5.0.0"
+numba = "^0.56.4"
+scipy = "^1.9.3"
 
-[tool.poetry.dev-dependencies]
-darglint = "^1.8.0"
-isort = "^5.10.0"
-pyupgrade = "^2.13.0"
-black = "^21.10b0"
-mypy = "^0.910"
-bandit = "^1.7.0"
-safety = "^1.10.3"
-pytest = "^6.2.3"
-pylint = "^2.8.2"
-pydocstyle = "^6.0.0"
-pre-commit = "^2.12.1"
+[tool.poetry.group.dev.dependencies]
+darglint = "^1.8.1"
+isort = "^5.10.1"
+pyupgrade = "^3.2.2"
+mypy = "^0.991"
+bandit = "^1.7.4"
+safety = "^2.3.1"
+pytest = "^7.2.0"
+pydocstyle = "^6.1.1"
+pre-commit = "^2.19.0"
+pylint = "^2.15.5"
+black = "^22.10.0"
 
 [tool.black]
 # https://github.com/psf/black
 line-length = 80
-target-version = ["py37"]
+target-version = ["py39"]
 
 [tool.isort]
 # https://github.com/timothycrosley/isort/
