@@ -151,7 +151,7 @@ class BooleanShape(Shape, Filter):
             return self.shape_a.contains(v, f) and self.shape_b.contains(v, f)
         elif self.op == Op.Difference:
             return self.shape_a.contains(v, f) and not self.shape_b.contains(
-                v, f
+                v, -f
             )
         elif self.op == Op.Union:
             return self.shape_a.contains(v, f) or self.shape_b.contains(v, f)
