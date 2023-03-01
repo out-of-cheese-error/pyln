@@ -44,7 +44,7 @@ scipy = "^1.9.3"
 
 [tool.poetry.group.dev.dependencies]
 bandit = "^1.7.1"
-black = "^22.10.0"
+black = "^23.1.0"
 darglint = "^1.8.1"
 isort = {extras = ["colors"], version = "^5.10.1"}
 mypy = "^0.991"
